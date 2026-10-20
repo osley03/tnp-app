@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-16",
+  "workingFolderEditedDirectly": true,
+  "regressionTests": { "passed": 35, "failed": 0 },
+  "localPostgres": { "migrations": 15, "workflowGroups": 17, "sourceContracts": 43, "result": "passed", "authAndStorage": "simulated" },
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "productionHealth": "HTTP 200, expected TNP JSON",
+  "liveSupabase": {
+    "tourTable": "HTTP 200",
+    "unknownTour": "denied HTTP 403",
+    "anonymousPaymentEvidence": "denied HTTP 401",
+    "unauthenticatedCheckout": "denied",
+    "portableTourMigration": "deployed"
+  },
+  "browserRendering": { "result": "incomplete", "reason": "Development server transport timeout; production browser run timed out waiting for the first page body", "completedScreens": 0 },
+  "testData": "Isolated synthetic records; no test accounts or records inserted into real Supabase",
+  "payments": "No sandbox or real provider transaction executed; merchant activation still required",
+  "hosting": "Render configuration prepared; hosting account and public deployment still required"
+}

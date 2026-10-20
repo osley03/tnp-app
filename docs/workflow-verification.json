@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-20T10:18:14.259Z",
+  "scope": "Local application and synthetic browser tests. No live payment or hosted deployment is certified.",
+  "passed": false,
+  "results": [
+    {
+      "check": "role-browser",
+      "passed": false,
+      "exitCode": 1
+    }
+  ]
+}

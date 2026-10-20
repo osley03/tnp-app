@@ -1,0 +1,503 @@
+{
+  "checkedAt": "2026-10-19T11:30:10.702Z",
+  "scope": "Static source/database contract audit against a locally migrated PostgreSQL database. This does not exercise every UI interaction.",
+  "moduleCount": 49,
+  "issues": [],
+  "modules": [
+    {
+      "file": "src/components/dashboard/Enquiries.tsx",
+      "tables": [
+        "landlord_contact_requests"
+      ],
+      "functions": [
+        "tnp_reply_to_enquiry"
+      ]
+    },
+    {
+      "file": "src/components/properties/AdminAddProperty.tsx",
+      "tables": [
+        "properties",
+        "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/lib/session.ts",
+      "tables": [
+        "profiles",
+        "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/landlords/LandlordPropertyHistory.tsx",
+      "tables": [
+        "property_history"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/payments/manual/api.ts",
+      "tables": [
+        "tnp_manual_payment_events"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/payments/manual/ManualPayments.tsx",
+      "tables": [
+        "disputes",
+        "tnp_manual_payment_decisions",
+        "tnp_manual_payment_submissions",
+        "tnp_payment_destinations"
+      ],
+      "functions": [
+        "tnp_decide_manual_payment",
+        "tnp_payment_destinations_for",
+        "tnp_save_payment_destination",
+        "tnp_submit_manual_payment",
+        "tnp_verify_manual_chain"
+      ]
+    },
+    {
+      "file": "src/modules/payments/PaymentEvidence.tsx",
+      "tables": [
+        "lease_payments",
+        "tnp_payment_evidence"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/payments/RentalPaymentPage.tsx",
+      "tables": [],
+      "functions": [
+        "create_lease_payment",
+        "tnp_create_monthly_rent"
+      ]
+    },
+    {
+      "file": "src/modules/payments/TenantPaymentShortcut.tsx",
+      "tables": [],
+      "functions": [
+        "tnp_payment_summary"
+      ]
+    },
+    {
+      "file": "src/modules/payments/useRentalPayments.ts",
+      "tables": [
+        "lease_payments",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": [
+        "tnp_payment_summary"
+      ]
+    },
+    {
+      "file": "src/modules/public-reports/PublicReportPage.tsx",
+      "tables": [],
+      "functions": [
+        "tnp_submit_public_report",
+        "tnp_track_public_report"
+      ]
+    },
+    {
+      "file": "src/modules/virtual-tours/api/tours.ts",
+      "tables": [
+        "tnp_tour_scenes",
+        "tnp_tours"
+      ],
+      "functions": [
+        "tnp_save_tour",
+        "tnp_tour_members",
+        "tnp_tour_view_count"
+      ]
+    },
+    {
+      "file": "src/modules/virtual-tours/components/PropertyTourBuilder.tsx",
+      "tables": [
+        "tnp_tours"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/virtual-tours/components/TourLibrary.tsx",
+      "tables": [
+        "tnp_tours"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/virtual-tours/editor/SharePanel.tsx",
+      "tables": [
+        "profiles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/virtual-tours/viewer/PublicTourGallery.tsx",
+      "tables": [
+        "tnp_tours"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/auth.tsx",
+      "tables": [
+        "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/ai.tsx",
+      "tables": [
+        "disputes",
+        "lease_payments",
+        "leases",
+        "profiles",
+        "properties",
+        "reviews",
+        "scam_cases"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/disputes.tsx",
+      "tables": [
+        "dispute_admin_actions",
+        "disputes",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/leases.tsx",
+      "tables": [
+        "lease_admin_actions",
+        "lease_disputes",
+        "lease_events",
+        "lease_payments",
+        "lease_requests",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": [
+        "tnp_change_lease_status",
+        "tnp_create_lease_from_request"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/payments.tsx",
+      "tables": [
+        "lease_payments",
+        "leases",
+        "payment_admin_actions",
+        "profiles",
+        "properties"
+      ],
+      "functions": [
+        "tnp_record_payment_status"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/profiles.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties",
+        "reviews",
+        "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/properties.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties",
+        "property_admin_actions",
+        "property_history",
+        "property_reports",
+        "property_verification_events",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/reviews.tsx",
+      "tables": [
+        "profiles",
+        "properties",
+        "review_admin_actions",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin/scam-cases.tsx",
+      "tables": [
+        "profiles",
+        "properties",
+        "scam_case_admin_actions",
+        "scam_cases"
+      ],
+      "functions": [
+        "tnp_admin_case_action"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.admin.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties",
+        "scam_cases"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.applicant.$id.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/applicants.tsx",
+      "tables": [
+        "lease_requests",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/disputes.tsx",
+      "tables": [
+        "dispute_evidence",
+        "dispute_messages",
+        "disputes",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/escrow.tsx",
+      "tables": [
+        "lease_payments",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/integrity.tsx",
+      "tables": [
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/portfolio.tsx",
+      "tables": [
+        "disputes",
+        "lease_payments",
+        "lease_requests",
+        "leases",
+        "properties",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/properties.tsx",
+      "tables": [
+        "lease_payments",
+        "lease_requests",
+        "leases",
+        "profiles",
+        "properties",
+        "reviews",
+        "tnp_tours"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/requests.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/reviews.tsx",
+      "tables": [
+        "profiles",
+        "properties",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord/trust-profiles.tsx",
+      "tables": [
+        "disputes",
+        "lease_payments",
+        "lease_requests",
+        "leases",
+        "profiles",
+        "properties",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.landlord.tsx",
+      "tables": [
+        "disputes",
+        "lease_payments",
+        "lease_requests",
+        "leases",
+        "profiles",
+        "properties",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.property.$id.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties",
+        "property_history",
+        "reviews"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.settings.tsx",
+      "tables": [
+        "profiles",
+        "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/ai-match.tsx",
+      "tables": [
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/applications.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/land-scam-check.tsx",
+      "tables": [
+        "land_scam_check_findings",
+        "profiles",
+        "properties"
+      ],
+      "functions": [
+        "run_land_scam_check"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/landlords.tsx",
+      "tables": [
+        "landlord_contact_requests",
+        "landlord_reports",
+        "reviews",
+        "tenant_landlord_profiles",
+        "tenant_landlord_properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/leases.tsx",
+      "tables": [
+        "disputes",
+        "lease_documents",
+        "lease_events",
+        "lease_payments",
+        "leases",
+        "profiles",
+        "properties"
+      ],
+      "functions": [
+        "request_lease_renewal"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/properties.tsx",
+      "tables": [
+        "profiles",
+        "properties",
+        "property_favorites",
+        "property_tour_scenes",
+        "property_tours"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/report-scam.tsx",
+      "tables": [
+        "properties"
+      ],
+      "functions": [
+        "submit_scam_case"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant/reviews.tsx",
+      "tables": [
+        "leases",
+        "profiles",
+        "properties",
+        "review_events",
+        "reviews"
+      ],
+      "functions": [
+        "report_review",
+        "submit_tenant_review",
+        "update_tenant_review"
+      ]
+    },
+    {
+      "file": "src/routes/_authenticated/app.tenant.tsx",
+      "tables": [
+        "lease_requests",
+        "profiles",
+        "properties"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/routes/_authenticated/route.tsx",
+      "tables": [
+        "user_roles"
+      ],
+      "functions": []
+    }
+  ]
+}

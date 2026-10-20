@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-20T10:24:57.787Z",
+  "scope": "Local source and synthetic database/browser checks; no real money transfer",
+  "results": [
+    {
+      "check": "regressions",
+      "passed": true,
+      "count": 62
+    },
+    {
+      "check": "database",
+      "passed": true,
+      "migrations": 21,
+      "workflowGroups": 21,
+      "sourceContracts": 49
+    },
+    {
+      "check": "typecheck",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "check": "payment-and-tour-focused-browser",
+      "passed": true,
+      "count": 22,
+      "scope": "Desktop and mobile, synthetic backend, manual payments and panorama checks; optional hosted gateway loop excluded in this focused run."
+    },
+    {
+      "check": "role-browser",
+      "passed": false,
+      "status": "incomplete",
+      "reason": "Full reruns were interrupted by browser launch/resource stalls on this 4 GB machine. Earlier run rendered all tenant and landlord desktop routes and exercised escalation; its visible-status assertion was corrected, but a complete fresh run is not claimed."
+    },
+    {
+      "check": "supabase-migrations",
+      "passed": true,
+      "count": 2,
+      "projectRef": "kjtkwujuevbzcydbjscq"
+    }
+  ]
+}

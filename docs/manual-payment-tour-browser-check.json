@@ -1,0 +1,117 @@
+{
+  "passed": true,
+  "scope": "Synthetic browser API fixtures. Approval, billing and provider verification tested separately in the local database.",
+  "results": [
+    {
+      "size": "desktop",
+      "check": "Find a property reaches tenant listings",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Approved deposit selects correct invoice; both methods visible; disabled merchant is explicit",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Approved application opens payment options",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Manual payment proof submits the chosen invoice and blocks duplicate payment while waiting",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Landlord receiving-details form and confirmation controls complete the two-sided manual workflow",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Admin filters a lease, checks its chain and exports tenant proof plus landlord confirmation",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Admin printable PDF evidence view includes the checksum-checked receipt",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Landlord dashboard payment card opens the received-payments ledger",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Landlord paid history includes property, tenant, month and dates",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Local panorama checker rejects a partial phone panorama and previews a valid spherical image",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "Property form is at viewport top; labels are navy and linked to inputs",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Find a property reaches tenant listings",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Approved deposit selects correct invoice; both methods visible; disabled merchant is explicit",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Approved application opens payment options",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Manual payment proof submits the chosen invoice and blocks duplicate payment while waiting",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Landlord receiving-details form and confirmation controls complete the two-sided manual workflow",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Admin filters a lease, checks its chain and exports tenant proof plus landlord confirmation",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Admin printable PDF evidence view includes the checksum-checked receipt",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Landlord dashboard payment card opens the received-payments ledger",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Landlord paid history includes property, tenant, month and dates",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Local panorama checker rejects a partial phone panorama and previews a valid spherical image",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "Property form is at viewport top; labels are navy and linked to inputs",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

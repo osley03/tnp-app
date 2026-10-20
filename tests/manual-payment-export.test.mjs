@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {csvCell,trailCsv,escapeHtml} from '../src/modules/payments/manual/exports.ts';
+test('payment CSV preserves evidence and neutralizes spreadsheet formulas',()=>{assert.ok(csvCell('=1+1').startsWith(String.fromCharCode(34,39)));assert.equal(csvCell('bank "reference"'),'"bank ""reference"""');const csv=trailCsv([{id:1,lease_id:'lease',created_at:'2026-10-19',payload:{event:'tenant_submitted',reference:'=not-a-formula'},previous_hash:'0'.repeat(64),entry_hash:'a'.repeat(64)}]);assert.ok(csv.includes('Previous hash'));assert.ok(csv.includes('tenant_submitted'));assert.ok(csv.includes('a'.repeat(64)));});
+test('printable evidence escapes user text before rendering HTML',()=>{assert.equal(escapeHtml('<img src=x onerror="x">'), '&lt;img src=x onerror=&quot;x&quot;&gt;');});

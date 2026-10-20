@@ -1,0 +1,14 @@
+import fs from 'node:fs/promises';
+const env = Object.fromEntries((await fs.readFile(new URL('../.env', import.meta.url), 'utf8')).split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('#')).map(line => { const at = line.indexOf('='); return [line.slice(0, at).trim(), line.slice(at + 1).trim().replace(/^(['"])(.*)\1$/, '$2')]; }));
+const url = env.VITE_SUPABASE_URL || env.SUPABASE_URL;
+const key = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY;
+if (!url || !key) throw new Error('Missing public Supabase connection settings');
+const headers = { apikey: key, 'Content-Type': 'application/json' };
+const table = await fetch(url + '/rest/v1/tnp_tours?select=id&limit=1', { headers, signal: AbortSignal.timeout(20000) });
+console.log('Public tour-table endpoint: HTTP ' + table.status);
+if (!table.ok) throw new Error('Tour-table endpoint failed');
+const service = await fetch(url + '/functions/v1/virtual-tours', { method: 'POST', headers, body: JSON.stringify({ tourId: '00000000-0000-0000-0000-000000000000', password: '' }), signal: AbortSignal.timeout(20000) });
+const body = await service.json();
+console.log('Unknown-tour access check: HTTP ' + service.status + ' — ' + String(body.error || 'Unexpected response'));
+if (service.status !== 403 || body.error !== 'Tour unavailable or password required') throw new Error('Tour service did not return its expected protected response');
+console.log('Read-only connectivity checks passed. No accounts, tours or properties were created. Upload and tenant UI checks still require signed-in sessions.');

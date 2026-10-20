@@ -1,0 +1,25 @@
+{
+  "scope": "Local source, regression, PostgreSQL and production-build checks. Supabase authentication/storage are simulated; no live deployment.",
+  "results": [
+    {
+      "check": "typecheck",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "regressions",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "database",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "build",
+      "exitCode": 0,
+      "passed": true
+    }
+  ]
+}

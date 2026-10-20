@@ -1,0 +1,16 @@
+node_modules/
+.output/
+.tanstack/
+.validation/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+*.log
+*.writing
+*.tsbuildinfo
+*.zip
+.DS_Store
+Thumbs.db
+
+.vercel/

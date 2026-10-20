@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-20T09:45:30.272Z",
+  "projectRef": "kjtkwujuevbzcydbjscq",
+  "appliedMigrations": [
+    "20261019120000_tnp_manual_payment_trail.sql",
+    "20261019130000_tnp_external_property_tours.sql"
+  ],
+  "result": "Supabase CLI db push succeeded",
+  "liveTransfersTested": false
+}

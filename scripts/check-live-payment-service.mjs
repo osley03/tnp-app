@@ -1,0 +1,12 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const env=Object.fromEntries((await fs.readFile(new URL('../.env',import.meta.url),'utf8')).split(/\r?\n/).filter(line=>line.includes('=')&&!line.trim().startsWith('#')).map(line=>{const at=line.indexOf('=');return[line.slice(0,at).trim(),line.slice(at+1).trim().replace(/^(['"])(.*)\1$/,'$2')];}));
+const url=env.VITE_SUPABASE_URL||env.SUPABASE_URL,key=env.VITE_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_PUBLISHABLE_KEY;
+if(!url||!key)throw new Error('Missing Supabase public connection settings');
+const evidence=await fetch(url+'/rest/v1/tnp_payment_evidence?select=id&limit=1',{headers:{apikey:key},signal:AbortSignal.timeout(20000)});
+assert.ok([401,403].includes(evidence.status),'Anonymous evidence reads must be denied');
+console.log('Live receipt privacy check PASS: anonymous reads denied (HTTP '+evidence.status+').');
+const response=await fetch(url+'/functions/v1/payment-gateway',{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify({action:'checkout',paymentId:'00000000-0000-0000-0000-000000000000',method:'ecocash'}),signal:AbortSignal.timeout(20000)});
+const body=await response.json();
+assert.equal(response.status,401);assert.equal(body.error,'Sign in required');
+console.log('Live gateway authentication check PASS: unauthenticated checkout denied. No provider transaction was created.');

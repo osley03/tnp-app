@@ -1,0 +1,71 @@
+{
+  "scope": "Synthetic browser API fixtures; database workflow verified separately.",
+  "passed": true,
+  "results": [
+    {
+      "size": "desktop",
+      "module": "payments",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "module": "landlords",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "module": "reviews",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "module": "ai-match",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "module": "welcome-to-signup",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "module": "public-report-submission-and-tracking",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "payments",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "landlords",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "reviews",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "ai-match",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "welcome-to-signup",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "module": "public-report-submission-and-tracking",
+      "passed": true
+    },
+    {
+      "module": "admin-public-case-inspection-and-resolution-action",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

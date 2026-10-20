@@ -1,0 +1,7 @@
+project_id = "kjtkwujuevbzcydbjscq"
+[functions.virtual-tours]
+verify_jwt = false
+[functions.payment-gateway]
+# Provider callbacks cannot carry a tenant JWT. The function verifies callback
+# signatures and verifies tenant JWTs itself for checkout/status operations.
+verify_jwt = false

@@ -1,0 +1,13 @@
+node_modules/
+.output/
+.tanstack/
+.validation/
+.git/
+.vercel/
+.env
+.env.*
+supabase/.temp/
+*.log
+*.writing
+*.tsbuildinfo
+*.zip

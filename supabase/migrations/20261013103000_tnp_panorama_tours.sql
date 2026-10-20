@@ -1,0 +1,94 @@
+-- Panorama tours can be created before a property listing exists.
+CREATE TABLE public.tnp_tours (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title text NOT NULL CHECK (length(trim(title)) BETWEEN 1 AND 120),
+  is_published boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE public.tnp_tour_scenes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tour_id uuid NOT NULL REFERENCES public.tnp_tours(id) ON DELETE CASCADE,
+  name text NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 80),
+  panorama_url text NOT NULL,
+  storage_path text NOT NULL,
+  scene_order int NOT NULL DEFAULT 0 CHECK (scene_order >= 0),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX tnp_tours_owner_idx ON public.tnp_tours(owner_id);
+CREATE INDEX tnp_tour_scenes_tour_idx ON public.tnp_tour_scenes(tour_id, scene_order);
+ALTER TABLE public.tnp_tours ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tnp_tour_scenes ENABLE ROW LEVEL SECURITY;
+GRANT SELECT ON public.tnp_tours, public.tnp_tour_scenes TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.tnp_tours, public.tnp_tour_scenes TO authenticated;
+GRANT ALL ON public.tnp_tours, public.tnp_tour_scenes TO service_role;
+CREATE POLICY tnp_tours_public_read ON public.tnp_tours FOR SELECT USING (is_published);
+CREATE POLICY tnp_tours_owner_read ON public.tnp_tours FOR SELECT TO authenticated USING (owner_id = auth.uid());
+CREATE POLICY tnp_tours_create ON public.tnp_tours FOR INSERT TO authenticated WITH CHECK (
+  owner_id = auth.uid() AND (public.has_role(auth.uid(), 'landlord') OR public.has_role(auth.uid(), 'admin'))
+);
+CREATE POLICY tnp_tours_update ON public.tnp_tours FOR UPDATE TO authenticated USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid());
+CREATE POLICY tnp_tours_delete ON public.tnp_tours FOR DELETE TO authenticated USING (owner_id = auth.uid());
+CREATE POLICY tnp_scenes_read ON public.tnp_tour_scenes FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.tnp_tours t WHERE t.id = tour_id AND t.is_published)
+);
+CREATE POLICY tnp_scenes_owner ON public.tnp_tour_scenes FOR ALL TO authenticated USING (
+  EXISTS (SELECT 1 FROM public.tnp_tours t WHERE t.id = tour_id AND t.owner_id = auth.uid())
+) WITH CHECK (
+  EXISTS (SELECT 1 FROM public.tnp_tours t WHERE t.id = tour_id AND t.owner_id = auth.uid())
+  AND split_part(storage_path, '/', 1) = auth.uid()::text
+  AND split_part(storage_path, '/', 2) = tour_id::text
+);
+
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('tnp-panoramas', 'tnp-panoramas', true, 20971520, ARRAY['image/jpeg','image/png'])
+ON CONFLICT (id) DO UPDATE SET public = true, file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
+CREATE POLICY tnp_panorama_upload ON storage.objects FOR INSERT TO authenticated WITH CHECK (
+  bucket_id = 'tnp-panoramas' AND (storage.foldername(name))[1] = auth.uid()::text
+  AND EXISTS (SELECT 1 FROM public.tnp_tours t WHERE t.id::text = (storage.foldername(name))[2] AND t.owner_id = auth.uid())
+);
+CREATE POLICY tnp_panorama_delete ON storage.objects FOR DELETE TO authenticated USING (
+  bucket_id = 'tnp-panoramas' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+CREATE POLICY tnp_panorama_owner_read ON storage.objects FOR SELECT TO authenticated USING (
+  bucket_id = 'tnp-panoramas' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Bring the listing schema into line with the existing add/edit form.
+ALTER TABLE public.properties
+  ADD COLUMN IF NOT EXISTS tour_url text,
+  ADD COLUMN IF NOT EXISTS property_category text NOT NULL DEFAULT 'Residential',
+  ADD COLUMN IF NOT EXISTS listing_type text NOT NULL DEFAULT 'For Rent',
+  ADD COLUMN IF NOT EXISTS price_usd numeric,
+  ADD COLUMN IF NOT EXISTS price_unit text NOT NULL DEFAULT 'total',
+  ADD COLUMN IF NOT EXISTS rooms int,
+  ADD COLUMN IF NOT EXISTS size numeric,
+  ADD COLUMN IF NOT EXISTS size_unit text NOT NULL DEFAULT 'm²',
+  ADD COLUMN IF NOT EXISTS land_use text,
+  ADD COLUMN IF NOT EXISTS water_available boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS electricity_available boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS road_access boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS zoning text,
+  ADD COLUMN IF NOT EXISTS title_status text;
+
+CREATE OR REPLACE FUNCTION public.validate_tnp_property_tour()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE linked_id uuid;
+BEGIN
+  IF NEW.tour_url IS NULL OR btrim(NEW.tour_url) = '' THEN NEW.tour_url := NULL; RETURN NEW; END IF;
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.tour_url IS NOT DISTINCT FROM OLD.tour_url AND NEW.owner_id = OLD.owner_id THEN RETURN NEW; END IF;
+  END IF;
+  IF NEW.tour_url !~ '^https?://[^/]+/tours/[0-9a-fA-F-]{36}/?$' THEN
+    RAISE EXCEPTION 'Use a TNP tour URL generated by the tour manager';
+  END IF;
+  linked_id := substring(NEW.tour_url from '/tours/([0-9a-fA-F-]{36})')::uuid;
+  IF NOT EXISTS (SELECT 1 FROM public.tnp_tours WHERE id = linked_id AND owner_id = NEW.owner_id AND is_published) THEN
+    RAISE EXCEPTION 'The tour must be published and owned by the property owner';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.validate_tnp_property_tour() FROM PUBLIC, anon, authenticated;
+CREATE TRIGGER validate_tnp_property_tour BEFORE INSERT OR UPDATE ON public.properties
+FOR EACH ROW EXECUTE FUNCTION public.validate_tnp_property_tour();
