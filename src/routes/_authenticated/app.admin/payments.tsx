@@ -1,5 +1,5 @@
-import {ManualPaymentTrail} from '@/modules/payments/manual/ManualPayments';
-import { PaymentEvidence } from '@/modules/payments/PaymentEvidence';
+import { ManualPaymentTrail } from "@/modules/payments/manual/ManualPayments";
+import { PaymentEvidence } from "@/modules/payments/PaymentEvidence";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,7 +31,8 @@ export const Route = createFileRoute("/_authenticated/app/admin/payments")({
   component: AdminPayments,
 });
 
-type PaymentStatus = "paid" | "processing" | "pending" | "held" | "released" | "refunded" | "failed" | "disputed";
+type PaymentStatus =
+  "paid" | "processing" | "pending" | "held" | "released" | "refunded" | "failed" | "disputed";
 
 type PaymentType = "deposit" | "rent" | "admin_fee" | "utility" | "late_fee" | "other" | "refund";
 
@@ -90,8 +91,14 @@ const STATUS_CONFIG: Record<
     className: string;
   }
 > = {
-  paid: { label: "Provider-confirmed paid", className: "bg-emerald-500/10 text-emerald-300 border-emerald-400/20" },
-  processing: { label: "Processing — awaiting confirmation", className: "bg-amber-500/10 text-amber-300 border-amber-400/20" },
+  paid: {
+    label: "Provider-confirmed paid",
+    className: "bg-emerald-500/10 text-emerald-300 border-emerald-400/20",
+  },
+  processing: {
+    label: "Processing — awaiting confirmation",
+    className: "bg-amber-500/10 text-amber-300 border-amber-400/20",
+  },
   pending: {
     label: "Pending",
     className: "bg-amber-500/10 text-amber-300 border-amber-400/20",
@@ -414,8 +421,11 @@ function AdminPayments() {
         throw new Error("Your admin session has expired.");
       }
 
-      const {error}=await supabase.rpc('tnp_record_payment_status' as never,{p_payment_id:payment.id,p_status:newStatus,p_action:action} as never);
-      if(error)throw new Error(error.message);
+      const { error } = await supabase.rpc(
+        "tnp_record_payment_status" as never,
+        { p_payment_id: payment.id, p_status: newStatus, p_action: action } as never,
+      );
+      if (error) throw new Error(error.message);
 
       setActionMessage(`Payment successfully moved to ${STATUS_CONFIG[newStatus].label}.`);
 
@@ -488,7 +498,8 @@ function AdminPayments() {
   return (
     <div className="tnp-module tnp-module-dark min-h-screen bg-[#090a0a] text-white">
       <div className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
-        <ManualPaymentTrail role="admin"/><PaymentEvidence/>
+        <ManualPaymentTrail role="admin" />
+        <PaymentEvidence />
         {/* ======================================================
             HEADER
         ====================================================== */}

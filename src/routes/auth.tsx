@@ -1,4 +1,4 @@
-import { resolveRole } from '@/lib/roles';
+import { resolveRole } from "@/lib/roles";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,9 @@ import authBg from "@/assets/auth-bg.jpg";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { mode?: "signup" | "signin" | undefined } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode?: "signup" | "signin" | undefined } => ({
     mode: search["mode"] === "signup" || search["mode"] === "signin" ? search["mode"] : undefined,
   }),
   head: () => ({
@@ -40,7 +42,13 @@ function PublicAuthPage() {
   return <AuthPage initialMode={mode ?? "signup"} />;
 }
 
-export function AuthPage({ adminOnly = false, initialMode = "signup" }: { adminOnly?: boolean; initialMode?: "signup" | "signin" }) {
+export function AuthPage({
+  adminOnly = false,
+  initialMode = "signup",
+}: {
+  adminOnly?: boolean;
+  initialMode?: "signup" | "signin";
+}) {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signup" | "signin">(adminOnly ? "signin" : initialMode);
   const [role, setRole] = useState<AppRole>("tenant");
@@ -79,10 +87,17 @@ export function AuthPage({ adminOnly = false, initialMode = "signup" }: { adminO
     const role = resolveRole(roleRows ?? []);
     if (adminOnly && role !== "admin") {
       const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
-      setMsg(signOutError ? "Administrator access required. Please sign out before continuing." : "This account does not have administrator access. Use the tenant or landlord sign-in page.");
+      setMsg(
+        signOutError
+          ? "Administrator access required. Please sign out before continuing."
+          : "This account does not have administrator access. Use the tenant or landlord sign-in page.",
+      );
       return;
     }
-    if (!role) { setMsg('Your account has no assigned role. Contact TNP support.'); return; }
+    if (!role) {
+      setMsg("Your account has no assigned role. Contact TNP support.");
+      return;
+    }
 
     navigate({ to: roleHome(role) });
   }
@@ -98,7 +113,7 @@ export function AuthPage({ adminOnly = false, initialMode = "signup" }: { adminO
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth`,
+            emailRedirectTo: "https://tnp-app-alpha.vercel.app/auth",
             data: {
               full_name: fullName.trim(),
               phone: phone.trim(),
@@ -178,44 +193,51 @@ export function AuthPage({ adminOnly = false, initialMode = "signup" }: { adminO
         {/* Centered glass card */}
         <div className="w-full max-w-[380px] rounded-3xl bg-ink/55 p-6 shadow-2xl ring-1 ring-fg/10 backdrop-blur-xl">
           <p className="text-center font-display text-xl font-bold tracking-tight">
-            {adminOnly ? "Administrator sign in" : mode === "signup" ? "Create your account" : "Welcome back"}
+            {adminOnly
+              ? "Administrator sign in"
+              : mode === "signup"
+                ? "Create your account"
+                : "Welcome back"}
           </p>
           <p className="mt-1 text-center text-[11px] text-fg/60">
-            {adminOnly ? "Sign in with your assigned TNP administrator account." : mode === "signup"
-              ? "Pick your role — your dashboard is built for it."
-              : "Sign in to your TNP dashboard."}
+            {adminOnly
+              ? "Sign in with your assigned TNP administrator account."
+              : mode === "signup"
+                ? "Pick your role — your dashboard is built for it."
+                : "Sign in to your TNP dashboard."}
           </p>
 
           {/* Mode toggle */}
-          {!adminOnly && (mode === "signup" ? (
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signin");
-                setMsg(null);
-                setEmail("");
-                setPassword("");
-                setName("");
-                setPhone("");
-              }}
-              className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
-            >
-              Already have an account? <span className="text-terra">SIGN IN</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setMsg(null);
-                setEmail("");
-                setPassword("");
-              }}
-              className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
-            >
-              Don't have an account? <span className="text-terra">SIGN UP</span>
-            </button>
-          ))}
+          {!adminOnly &&
+            (mode === "signup" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signin");
+                  setMsg(null);
+                  setEmail("");
+                  setPassword("");
+                  setName("");
+                  setPhone("");
+                }}
+                className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
+              >
+                Already have an account? <span className="text-terra">SIGN IN</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signup");
+                  setMsg(null);
+                  setEmail("");
+                  setPassword("");
+                }}
+                className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
+              >
+                Don't have an account? <span className="text-terra">SIGN UP</span>
+              </button>
+            ))}
 
           <form onSubmit={submit} className="mt-4 space-y-3">
             {mode === "signup" && (
@@ -260,25 +282,44 @@ export function AuthPage({ adminOnly = false, initialMode = "signup" }: { adminO
               required
             />
 
-            {msg && <p role="status" aria-live="polite" className="text-[11px] text-clay">{msg}</p>}
+            {msg && (
+              <p role="status" aria-live="polite" className="text-[11px] text-clay">
+                {msg}
+              </p>
+            )}
 
             <button
               type="submit"
               disabled={busy}
               className="w-full rounded-xl bg-terra px-3 py-2.5 font-display text-[12px] font-semibold text-ink transition-opacity disabled:opacity-50"
             >
-              {busy ? "Working…" : adminOnly ? "Sign in as administrator" : mode === "signup" ? `Create ${role} account` : "Sign in"}
+              {busy
+                ? "Working…"
+                : adminOnly
+                  ? "Sign in as administrator"
+                  : mode === "signup"
+                    ? `Create ${role} account`
+                    : "Sign in"}
             </button>
           </form>
         </div>
 
-        <Link to="/report" className="mt-5 text-center text-xs font-semibold text-terra underline underline-offset-4">Report suspicious activity · no account needed</Link>
+        <Link
+          to="/report"
+          className="mt-5 text-center text-xs font-semibold text-terra underline underline-offset-4"
+        >
+          Report suspicious activity · no account needed
+        </Link>
 
         <p className="mt-5 max-w-[340px] text-center font-mono text-[9px] leading-relaxed text-fg/50">
           {adminOnly ? (
-            <Link to="/auth" className="underline underline-offset-4 hover:text-fg">Tenant or landlord? Return to account access</Link>
+            <Link to="/auth" className="underline underline-offset-4 hover:text-fg">
+              Tenant or landlord? Return to account access
+            </Link>
           ) : (
-            <Link to="/admin-signin" className="underline underline-offset-4 hover:text-fg">Admin sign in</Link>
+            <Link to="/admin-signin" className="underline underline-offset-4 hover:text-fg">
+              Admin sign in
+            </Link>
           )}
         </p>
       </div>

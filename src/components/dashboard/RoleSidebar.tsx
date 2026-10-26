@@ -1,5 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   AlertTriangle,
   Building2,
@@ -111,8 +111,11 @@ export function RoleSidebar({ role, userName = "TNP User", userEmail }: RoleSide
 
   const handleLogout = async () => {
     await qc.cancelQueries();
-    const {error} = await supabase.auth.signOut();
-    if(error){setLogoutError("Unable to sign out. Please retry.");return;}
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      setLogoutError("Unable to sign out. Please retry.");
+      return;
+    }
     qc.clear();
     navigate({ to: "/auth", replace: true });
   };
@@ -242,7 +245,11 @@ export function RoleSidebar({ role, userName = "TNP User", userEmail }: RoleSide
           USER FOOTER — stays pinned, outside the scroll area
       ===================================================== */}
 
-      {logoutError && <p role="alert" className="px-4 text-xs text-red-700">{logoutError}</p>}
+      {logoutError && (
+        <p role="alert" className="px-4 text-xs text-red-700">
+          {logoutError}
+        </p>
+      )}
       <SidebarFooter className="border-t border-white/[0.07] p-2">
         <SidebarMenu>
           <SidebarMenuItem>

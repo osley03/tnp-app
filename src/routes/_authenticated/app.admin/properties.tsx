@@ -1,4 +1,4 @@
-import { matchesSearch as matchWorkspaceSearch } from '@/lib/workspace-search';
+import { matchesSearch as matchWorkspaceSearch } from "@/lib/workspace-search";
 import { AdminAddProperty } from "@/components/properties/AdminAddProperty";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -330,7 +330,14 @@ function AdminPropertiesPage() {
     const query = search.trim().toLowerCase();
 
     return properties.filter((property) => {
-      const matchesSearch = matchWorkspaceSearch(query, property.title, property.city, property.suburb, property.property_type, property.id);
+      const matchesSearch = matchWorkspaceSearch(
+        query,
+        property.title,
+        property.city,
+        property.suburb,
+        property.property_type,
+        property.id,
+      );
 
       const matchesVerification =
         verificationFilter === "all" ||

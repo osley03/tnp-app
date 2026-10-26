@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.115.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.115.0";
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -10,7 +10,7 @@ function respond(body: unknown, status = 200) {
     headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
-Deno.serve(async (request) => {
+Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response(null, { headers: cors });
   if (request.method !== "POST") return respond({ error: "Method not allowed" }, 405);
   try {

@@ -61,6 +61,6 @@ The direct-to-landlord Paynow module is implemented. Apply migration `2026101609
 
 Tenant workflow and public reporting update: [details](docs/TENANT-MODULE-UPDATE.md).
 
-Rental approval and payment walkthrough: [tenant and landlord payments](docs/PAYMENT-JOURNEY.md).
+Rental approval and payment walkthrough: [tenant and landlord pnayments](docs/PAYMENT-JOURNEY.md).
 
 Manual direct-to-landlord payments: see [docs/MANUAL-PAYMENTS.md](docs/MANUAL-PAYMENTS.md). Capture and connect room tours using [docs/PROPERTY-WALKTHROUGHS.md](docs/PROPERTY-WALKTHROUGHS.md).
