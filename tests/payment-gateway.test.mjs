@@ -22,6 +22,7 @@ function edge(options={}) {
       let update=null;
       const query={select(){return query;},eq(){return query;},or(){return query;},order(){return query;},limit(){return query;},
         update(values){update=values;calls.push({kind:'update',table,values});return query;},
+        maybeSingle:async()=>({data:options.closedAccount?{account_id:tenant}:null,error:null}),
         single:async()=>({data:table==='lease_payments'?payment:table==='tnp_gateway_attempts'?{...attempt,...update}:null,error:null}),
         then(resolve,reject){return Promise.resolve({data:table==='tnp_gateway_attempts'?[attempt]:[{role:'landlord'}],error:null}).then(resolve,reject);}
       }; return query;
@@ -96,3 +97,5 @@ test('pausing checkout still permits provider verification of existing attempts'
  assert.equal(calls.find(call=>call.kind==='fetch').url,pollUrl);
  assert.equal(calls.some(call=>call.name==='tnp_confirm_gateway_payment'),true);
 });
+
+test('closed account cannot start checkout or poll as a tenant',async()=>{const {handler,calls}=edge({closedAccount:true});const response=await handler(request({action:'checkout',method:'ecocash'}));assert.equal(response.status,403);assert.equal(calls.filter(c=>c.kind==='fetch').length,0);});

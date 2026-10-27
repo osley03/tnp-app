@@ -194,6 +194,26 @@ await group('external tour allowlist preserves internal ownership checks',async(
  await assert.rejects(()=>asUser('landlord',()=>db.query('UPDATE public.properties SET tour_url=$1 WHERE id=$2',['https://tnp.example/tours/ffffffff-ffff-4fff-8fff-ffffffffffff',ids.property])));
  await asUser('landlord',()=>db.query('UPDATE public.properties SET tour_url=NULL WHERE id=$1',[ids.property]));
 });
+await group('account closure preserves evidence and rejects closed sessions',async()=>{
+ await db.exec('BEGIN');async function rejected(fn){await db.exec('SAVEPOINT denied');try{await assert.rejects(fn);}finally{await db.exec('ROLLBACK TO SAVEPOINT denied');}}try{
+ const before=(await db.query("SELECT (SELECT count(*) FROM public.leases) leases,(SELECT count(*) FROM public.lease_payments) payments,(SELECT count(*) FROM public.tnp_manual_payment_events) events")).rows[0];
+ await rejected(()=>asUser('tenant',()=>db.query('SELECT public.tnp_archive_account($1)',[ids.tenant])));
+ await rejected(()=>db.query('SELECT public.tnp_archive_account($1)',[ids.admin]));
+ for(const who of ['tenant','landlord']){
+ await db.query('SELECT public.tnp_archive_account($1)',[ids[who]]);
+ await db.query('SELECT public.tnp_archive_account($1)',[ids[who]]);
+ const profile=(await db.query('SELECT * FROM public.profiles WHERE id=$1',[ids[who]])).rows[0];assert.equal(profile.full_name,'Deleted account');assert.equal(profile.phone,null);assert.equal(profile.bio,null);
+ assert.equal((await db.query('SELECT * FROM public.user_roles WHERE user_id=$1',[ids[who]])).rows.length,0);
+ await rejected(()=>asUser(who,()=>db.query('SELECT public.tnp_require_active_account()')));
+ assert.equal((await asUser(who,()=>db.query('SELECT * FROM public.leases'))).rows.length,0);
+ assert.equal((await asUser(who,()=>db.query('SELECT * FROM public.tnp_deleted_accounts'))).rows.length,0);
+ }
+ const after=(await db.query("SELECT (SELECT count(*) FROM public.leases) leases,(SELECT count(*) FROM public.lease_payments) payments,(SELECT count(*) FROM public.tnp_manual_payment_events) events")).rows[0];assert.deepEqual(after,before);
+ assert.equal((await asUser('admin',()=>db.query('SELECT * FROM public.tnp_deleted_accounts'))).rows.length,2);
+ assert.equal((await db.query('SELECT * FROM public.properties WHERE owner_id=$1 AND available',[ids.landlord])).rows.length,0);
+ assert.equal((await db.query('SELECT * FROM public.tnp_tours WHERE owner_id=$1 AND is_published',[ids.landlord])).rows.length,0);
+ }finally{await db.exec('ROLLBACK');}
+});
 const fixtures={ids};for(const {table_name} of (await db.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")).rows)fixtures[table_name]=(await db.query('SELECT * FROM public."'+table_name+'"')).rows;
 await fs.mkdir(new URL('../.validation/fixtures/',import.meta.url),{recursive:true});await fs.writeFile(new URL('../.validation/fixtures/database.json',import.meta.url),JSON.stringify(fixtures));
 console.log('DATABASE VERIFICATION PASS: '+names.length+' migrations; '+groups+' workflow groups; '+contracts.moduleCount+' source contracts. Auth and storage are simulated locally.');await db.close();

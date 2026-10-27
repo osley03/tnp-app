@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-19T11:30:10.702Z",
+  "checkedAt": "2026-10-26T12:45:44.602Z",
   "scope": "Static source/database contract audit against a locally migrated PostgreSQL database. This does not exercise every UI interaction.",
-  "moduleCount": 49,
+  "moduleCount": 50,
   "issues": [],
   "modules": [
     {
@@ -26,6 +26,13 @@
       "tables": [
         "profiles",
         "user_roles"
+      ],
+      "functions": []
+    },
+    {
+      "file": "src/modules/accounts/DeletedAccounts.tsx",
+      "tables": [
+        "tnp_deleted_accounts"
       ],
       "functions": []
     },

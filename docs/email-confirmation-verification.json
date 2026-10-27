@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-27T07:39:40.415Z",
+  "project": "kjtkwujuevbzcydbjscq",
+  "results": [
+    {
+      "flow": "default Site URL",
+      "destination": "https://tnp-app-alpha.vercel.app/",
+      "emailConfirmed": true
+    },
+    {
+      "flow": "signup redirect",
+      "destination": "https://tnp-app-alpha.vercel.app/auth",
+      "emailConfirmed": true
+    }
+  ],
+  "emailsSent": false,
+  "existingAccountsModified": false
+}

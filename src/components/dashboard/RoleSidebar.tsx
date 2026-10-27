@@ -251,6 +251,7 @@ export function RoleSidebar({ role, userName = "TNP User", userEmail }: RoleSide
         </p>
       )}
       <SidebarFooter className="border-t border-white/[0.07] p-2">
+        {role !== "admin" && <button type="button" className="px-3 py-2 text-left text-xs font-medium text-red-700 hover:underline" onClick={() => navigate({to:"/app/settings",hash:"delete-account"})}>Delete account</button>}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

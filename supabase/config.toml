@@ -1,7 +1,14 @@
 project_id = "kjtkwujuevbzcydbjscq"
+[auth]
+site_url = "https://tnp-app-alpha.vercel.app"
+additional_redirect_urls = ["http://localhost:3000/**", "https://tnp-app-alpha.vercel.app/auth/callback", "https://tnp-app-alpha.vercel.app/auth"]
+
 [functions.virtual-tours]
 verify_jwt = false
 [functions.payment-gateway]
 # Provider callbacks cannot carry a tenant JWT. The function verifies callback
 # signatures and verifies tenant JWTs itself for checkout/status operations.
+verify_jwt = false
+
+[functions.account-deletion]
 verify_jwt = false

@@ -88,6 +88,7 @@ function edge(options = {}) {
   const doc = document();
   if (options.foreign) doc.scenes[0].storage_path = "other-owner/secret.jpg";
   const admin = {
+    from:()=>{const q={select(){return q},eq(){return q},maybeSingle:async()=>({data:options.closedAccount?{account_id:ownerId}:null,error:null})};return q},
     auth: { getUser: async () => ({ data: { user: options.user ? { id: options.user } : null } }) },
     rpc: async (name, args) => {
       calls.push({ name, args });
@@ -182,3 +183,5 @@ test("sharing service rejects unsupported methods and invalid tour IDs", async (
 });
 
 test('video cards embed only allowlisted YouTube and Vimeo player URLs',()=>{assert.equal(videoEmbedUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ'),'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');assert.equal(videoEmbedUrl('https://vimeo.com/123456789'),'https://player.vimeo.com/video/123456789');assert.equal(videoEmbedUrl('https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ'),null);assert.equal(videoEmbedUrl('javascript:alert(1)'),null);});
+
+test('closed account cannot obtain signed tour media',async()=>{const {handler,calls}=edge({user:ownerId,closedAccount:true});const response=await handler(new Request('https://edge.example',{method:'POST',headers:{authorization:'Bearer token'},body:JSON.stringify({tourId})}));assert.equal(response.status,403);assert.equal(calls.filter(c=>c.name==='sign').length,0);});

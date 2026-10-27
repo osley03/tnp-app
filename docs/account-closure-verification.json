@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-26T15:23:06.951Z",
+  "projectRef": "kjtkwujuevbzcydbjscq",
+  "results": [
+    {
+      "role": "tenant",
+      "closed": true,
+      "authSoftDeleted": true,
+      "staleJwtDenied": true,
+      "rpcDenied": true,
+      "wrongPasswordRejected": true
+    },
+    {
+      "role": "landlord",
+      "closed": true,
+      "authSoftDeleted": true,
+      "staleJwtDenied": true,
+      "rpcDenied": true,
+      "wrongPasswordRejected": true
+    }
+  ],
+  "existingAccountsModified": false,
+  "localChecks": {
+    "regressionTests": 70,
+    "databaseWorkflowGroups": 22,
+    "sourceContracts": 50,
+    "typecheck": "passed before final presentation changes",
+    "productionBuild": "running"
+  }
+}

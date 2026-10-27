@@ -34,6 +34,7 @@ Deno.serve(async (request: Request) => {
     const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (token) {
       const result = await admin.auth.getUser(token);
+      if(result.data.user){const closed=await admin.from('tnp_deleted_accounts').select('account_id').eq('account_id',result.data.user.id).maybeSingle();if(closed.error||closed.data)return respond({error:'Account is unavailable'},403);}
       viewer = result.data.user?.id || null;
     }
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";

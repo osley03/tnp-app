@@ -72,6 +72,7 @@ Deno.serve(async request => {
     const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return reply({ error: "Sign in required" }, 401);
     const auth = await admin.auth.getUser(token);
+    if(auth.data.user){const closed=await admin.from('tnp_deleted_accounts').select('account_id').eq('account_id',auth.data.user.id).maybeSingle();if(closed.error||closed.data)return reply({error:'Account is unavailable'},403);}
     if (auth.error || !auth.data.user) return reply({ error: "Sign in required" }, 401);
     const user = auth.data.user;
     const body = JSON.parse(text);

@@ -1,3 +1,5 @@
+import {DeletedAccounts} from '@/modules/accounts/DeletedAccounts';
+import {DeleteAccount} from '@/modules/accounts/DeleteAccount';
 import { resolveRole } from '@/lib/roles';
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -1160,11 +1162,7 @@ function SettingsPage() {
                     description="Account data export will be connected after the platform data-export service is implemented."
                   />
 
-                  <FutureFeature
-                    icon={AlertCircle}
-                    title="Deactivate account"
-                    description="Account deactivation will be connected once the account lifecycle workflow is implemented."
-                  />
+                  {role === "admin" ? <DeletedAccounts/> : role && <DeleteAccount role={role}/>}
                 </div>
               </SettingsSection>
 
