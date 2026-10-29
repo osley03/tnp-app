@@ -1,3 +1,4 @@
+import {PropertyTourLink} from '@/modules/virtual-tours/components/PropertyTourLink';
 import { applicationStatus } from '@/lib/application-status';
 import { validateProperty } from '@/lib/property-validation';
 import {
@@ -1784,6 +1785,7 @@ function PropertyDetailDrawer({
           </div>
 
           <div className="space-y-6 p-6">
+            {property.tour_url&&<PropertyTourLink value={property.tour_url} imageUrl={property.image_url} propertyTitle={property.title} propertyId={property.id}/>}
             {/* Overview */}
             <section>
               <div className="flex items-start justify-between gap-4">

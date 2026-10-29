@@ -167,7 +167,7 @@ function PropertyDetail() {
           </div>
         </section>
 
-        {p.tour_url && <PropertyTourLink value={p.tour_url}/>}
+        {p.tour_url && <PropertyTourLink value={p.tour_url} imageUrl={p.image_url} propertyTitle={p.title} propertyId={p.id}/>}
         <Card title="Landlord profile" meta={owner?.verification ?? "unverified"}>
           <TrustMeter score={owner?.trust_score ?? 50} label={owner?.full_name ?? "Landlord"} />
           <div className="mt-2 grid grid-cols-3 gap-2">

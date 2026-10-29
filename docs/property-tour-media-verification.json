@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-28T12:24:26.192Z",
+  "project": "kjtkwujuevbzcydbjscq",
+  "propertyRecordsChanged": false,
+  "properties": [],
+  "inspection": "unavailable",
+  "reason": "Command failed: C:\\Users\\SM333.DESKTOP-CLFNA3T\\AppData\\Local/npm-cache/_npx/aa8e5c70f9d8d161/node_modules/@supabase/cli-windows-x64/bin/supabase.exe projects api-keys --project-ref kjtkwujuevbzcydbjscq --output json\n"
+}

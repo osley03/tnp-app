@@ -1,7 +1,821 @@
 {
-  "scope": "Isolated synthetic fixtures; no live Supabase connection",
-  "result": "incomplete",
-  "error": "browserType.launch: Timeout 180000ms exceeded.\nCall log:\n\u001b[2m  - <launching> C:/Program Files/Google/Chrome/Application/chrome.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,AvoidCorsURLLoaderRestartOnRedirect,Translate,AutoDeElevate,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --use-angle=swiftshader --enable-unsafe-swiftshader --user-data-dir=C:\\Users\\SM333~1.DES\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-SNv2Dd --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=4048\u001b[22m\n",
-  "results": [],
-  "errors": []
+  "scope": "Browser rendering with isolated synthetic backend fixtures; no live Supabase connection.",
+  "screenChecks": 112,
+  "errors": [],
+  "results": [
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/applications",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/leases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/landlords",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/enquiries",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/report-scam",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/land-scam-check",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/tenant/ai-match",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "desktop",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Tenant lease cards identify actual properties",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "tenant",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/portfolio",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/requests",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/applicants",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/trust-profiles",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/enquiries",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/escrow",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/disputes",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/integrity",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/tours",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/landlord/tours/66666666-6666-4666-8666-666666666666",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "desktop",
+      "route": "/app/applicant/5d77982e-f82c-4c4b-b85d-ee06c7833aa1",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Landlord escalation submits admin review state without changing resolution",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "landlord",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/profiles",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/leases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/disputes",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/scam-cases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/ai",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/admin/accessibility",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "desktop",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Malformed scam report opens and admin submits resolution",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "Scam queue remains available when related profiles fail",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "Admin renders processing payment without crashing",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "admin",
+      "size": "desktop",
+      "passed": true
+    },
+    {
+      "check": "admin form text",
+      "size": "desktop",
+      "color": "rgb(15, 23, 42)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/applications",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/leases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/landlords",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/enquiries",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/report-scam",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/land-scam-check",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/tenant/ai-match",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "tenant",
+      "size": "mobile",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Tenant lease cards identify actual properties",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "tenant",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "Phone navigation retains desktop workspace theme",
+      "role": "tenant",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/portfolio",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/requests",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/applicants",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/trust-profiles",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/enquiries",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/escrow",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/disputes",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/integrity",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/tours",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/landlord/tours/66666666-6666-4666-8666-666666666666",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "landlord",
+      "size": "mobile",
+      "route": "/app/applicant/5d77982e-f82c-4c4b-b85d-ee06c7833aa1",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Landlord escalation submits admin review state without changing resolution",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "landlord",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "Phone navigation retains desktop workspace theme",
+      "role": "landlord",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/profiles",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/properties",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/leases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/payments",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/reviews",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/disputes",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/scam-cases",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/ai",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/admin/accessibility",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/settings",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "role": "admin",
+      "size": "mobile",
+      "route": "/app/property/55555555-5555-4555-8555-555555555555",
+      "failed": false,
+      "overflow": false,
+      "canvas": "rgb(11, 22, 40)"
+    },
+    {
+      "check": "Malformed scam report opens and admin submits resolution",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "Scam queue remains available when related profiles fail",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "Admin renders processing payment without crashing",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "module search and own-dashboard link target",
+      "role": "admin",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "admin form text",
+      "size": "mobile",
+      "color": "rgb(15, 23, 42)"
+    },
+    {
+      "check": "Phone navigation retains desktop workspace theme",
+      "role": "admin",
+      "size": "mobile",
+      "passed": true
+    },
+    {
+      "check": "tenant is redirected from landlord to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "tenant is redirected from admin to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "landlord is redirected from tenant to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "landlord is redirected from admin to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "admin is redirected from tenant to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "admin is redirected from landlord to own dashboard",
+      "passed": true
+    },
+    {
+      "check": "Duplicate registration truthful notice, resend cooldown, mobile welcome and reduced motion",
+      "passed": true
+    }
+  ]
 }

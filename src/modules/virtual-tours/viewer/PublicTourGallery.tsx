@@ -1,3 +1,4 @@
+import {TourDashboardLink} from '../components/TourDashboardLink';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import "../tour-studio.css";
@@ -19,6 +20,7 @@ export function PublicTourGallery() {
   return (
     <main className="tnp-tour-studio p-5 sm:p-10">
       <div className="mx-auto max-w-6xl">
+        <div className="mb-5"><TourDashboardLink/></div>
         <a href="/" className="font-bold">
           TNP · Home
         </a>

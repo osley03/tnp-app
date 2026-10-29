@@ -19,6 +19,16 @@
     },
     {
       "size": "desktop",
+      "check": "ecocash portal, hosted redirect and automatic return verification (simulated provider)",
+      "passed": true
+    },
+    {
+      "size": "desktop",
+      "check": "mastercard portal, hosted redirect and automatic return verification (simulated provider)",
+      "passed": true
+    },
+    {
+      "size": "desktop",
       "check": "Manual payment proof submits the chosen invoice and blocks duplicate payment while waiting",
       "passed": true
     },
@@ -70,6 +80,16 @@
     {
       "size": "mobile",
       "check": "Approved application opens payment options",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "ecocash portal, hosted redirect and automatic return verification (simulated provider)",
+      "passed": true
+    },
+    {
+      "size": "mobile",
+      "check": "mastercard portal, hosted redirect and automatic return verification (simulated provider)",
       "passed": true
     },
     {

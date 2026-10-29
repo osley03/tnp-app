@@ -1,6 +1,10 @@
+import {
+  registrationNotice,
+  TNP_EMAIL_REDIRECT,
+} from "@/lib/registration-notice";
 import { resolveRole } from "@/lib/roles";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { roleHome, type AppRole } from "@/lib/session";
 import authBg from "@/assets/auth-bg.jpg";
@@ -10,7 +14,10 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (
     search: Record<string, unknown>,
   ): { mode?: "signup" | "signin" | undefined } => ({
-    mode: search["mode"] === "signup" || search["mode"] === "signin" ? search["mode"] : undefined,
+    mode:
+      search["mode"] === "signup" || search["mode"] === "signin"
+        ? search["mode"]
+        : undefined,
   }),
   head: () => ({
     meta: [
@@ -23,7 +30,8 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "Sign up or sign in — TNP" },
       {
         property: "og:description",
-        content: "Role-based access for tenants, landlords and administrators on TNP.",
+        content:
+          "Role-based access for tenants, landlords and administrators on TNP.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -50,7 +58,9 @@ export function AuthPage({
   initialMode?: "signup" | "signin";
 }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signup" | "signin">(adminOnly ? "signin" : initialMode);
+  const [mode, setMode] = useState<"signup" | "signin">(
+    adminOnly ? "signin" : initialMode,
+  );
   const [role, setRole] = useState<AppRole>("tenant");
   const [fullName, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -58,13 +68,23 @@ export function AuthPage({
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [resendBusy, setResendBusy] = useState(false);
+  const [resendAfter, setResendAfter] = useState(0);
+  useEffect(() => {
+    if (!resendAfter) return;
+    const timer = window.setTimeout(
+      () => setResendAfter(0),
+      Math.max(0, resendAfter - Date.now()),
+    );
+    return () => window.clearTimeout(timer);
+  }, [resendAfter]);
 
   useEffect(() => {
     setMode(adminOnly ? "signin" : initialMode);
     setMsg(null);
   }, [adminOnly, initialMode]);
 
-  async function go() {
+  const go = useCallback(async () => {
     const { data, error } = await supabase.auth.getUser();
 
     if (error || !data.user) {
@@ -86,7 +106,9 @@ export function AuthPage({
 
     const role = resolveRole(roleRows ?? []);
     if (adminOnly && role !== "admin") {
-      const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
+      const { error: signOutError } = await supabase.auth.signOut({
+        scope: "local",
+      });
       setMsg(
         signOutError
           ? "Administrator access required. Please sign out before continuing."
@@ -100,8 +122,49 @@ export function AuthPage({
     }
 
     navigate({ to: roleHome(role) });
-  }
+  }, [adminOnly, navigate]);
 
+  useEffect(() => {
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    if (fragment.has("error")) {
+      setMode("signin");
+      setMsg(
+        "This verification link is invalid or expired. Request a new confirmation email below.",
+      );
+    } else if (fragment.has("access_token")) {
+      setBusy(true);
+      void go().finally(() => setBusy(false));
+    }
+  }, [go]);
+  async function resendConfirmation() {
+    if (busy || resendBusy || Date.now() < resendAfter) return;
+    if (!email.trim() || !email.includes("@")) {
+      setMsg("Enter your email address first.");
+      return;
+    }
+    setResendBusy(true);
+    setMsg(null);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: TNP_EMAIL_REDIRECT },
+      });
+      if (error) throw error;
+      setResendAfter(Date.now() + 60000);
+      setMsg(
+        "If this address belongs to an unverified account, a new confirmation has been requested. Already verified? Sign in.",
+      );
+    } catch (error) {
+      setMsg(
+        error instanceof Error
+          ? error.message
+          : "Unable to request confirmation. Please retry.",
+      );
+    } finally {
+      setResendBusy(false);
+    }
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -113,7 +176,7 @@ export function AuthPage({
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: "https://tnp-app-alpha.vercel.app/auth",
+            emailRedirectTo: TNP_EMAIL_REDIRECT,
             data: {
               full_name: fullName.trim(),
               phone: phone.trim(),
@@ -125,10 +188,9 @@ export function AuthPage({
         if (error) throw error;
 
         setPassword("");
-        setEmail("");
 
         if (!data.session) {
-          setMsg("Account created. Check your email to confirm, then sign in.");
+          setMsg(registrationNotice(data));
           setMode("signin");
           return;
         }
@@ -156,7 +218,22 @@ export function AuthPage({
         setPassword("");
       }
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Something went wrong");
+      const code =
+        err && typeof err === "object" && "code" in err ? String(err.code) : "";
+      if (
+        !adminOnly &&
+        mode === "signup" &&
+        ["user_already_exists", "email_exists"].includes(code)
+      ) {
+        setMode("signin");
+        setPassword("");
+        setMsg(registrationNotice({ user: { identities: [] } }));
+      } else if (code === "email_not_confirmed") {
+        setMsg(
+          "Verify your email before signing in. Use Resend verification below.",
+        );
+      } else
+        setMsg(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
@@ -222,7 +299,8 @@ export function AuthPage({
                 }}
                 className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
               >
-                Already have an account? <span className="text-terra">SIGN IN</span>
+                Already have an account?{" "}
+                <span className="text-terra">SIGN IN</span>
               </button>
             ) : (
               <button
@@ -235,7 +313,8 @@ export function AuthPage({
                 }}
                 className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
               >
-                Don't have an account? <span className="text-terra">SIGN UP</span>
+                Don't have an account?{" "}
+                <span className="text-terra">SIGN UP</span>
               </button>
             ))}
 
@@ -261,8 +340,17 @@ export function AuthPage({
 
             {mode === "signup" && (
               <>
-                <Input value={fullName} onChange={setName} placeholder="Full name" required />
-                <Input value={phone} onChange={setPhone} placeholder="Phone (+263 …)" />
+                <Input
+                  value={fullName}
+                  onChange={setName}
+                  placeholder="Full name"
+                  required
+                />
+                <Input
+                  value={phone}
+                  onChange={setPhone}
+                  placeholder="Phone (+263 …)"
+                />
               </>
             )}
             <Input
@@ -278,12 +366,18 @@ export function AuthPage({
               value={password}
               onChange={setPassword}
               placeholder="Password"
-              autocomplete={mode === "signup" ? "new-password" : "current-password"}
+              autocomplete={
+                mode === "signup" ? "new-password" : "current-password"
+              }
               required
             />
 
             {msg && (
-              <p role="status" aria-live="polite" className="text-[11px] text-clay">
+              <p
+                role="status"
+                aria-live="polite"
+                className="text-[11px] text-clay"
+              >
                 {msg}
               </p>
             )}
@@ -302,6 +396,20 @@ export function AuthPage({
                     : "Sign in"}
             </button>
           </form>
+          {!adminOnly && mode === "signin" && (
+            <button
+              type="button"
+              disabled={busy || resendBusy || resendAfter > Date.now()}
+              onClick={() => void resendConfirmation()}
+              className="mt-4 min-h-11 w-full rounded-xl border border-white/20 px-3 py-2 text-xs text-fg disabled:opacity-50"
+            >
+              {resendBusy
+                ? "Requesting confirmation…"
+                : resendAfter > Date.now()
+                  ? "Please wait before requesting again"
+                  : "Resend verification"}
+            </button>
+          )}
         </div>
 
         <Link
@@ -313,11 +421,17 @@ export function AuthPage({
 
         <p className="mt-5 max-w-[340px] text-center font-mono text-[9px] leading-relaxed text-fg/50">
           {adminOnly ? (
-            <Link to="/auth" className="underline underline-offset-4 hover:text-fg">
+            <Link
+              to="/auth"
+              className="underline underline-offset-4 hover:text-fg"
+            >
               Tenant or landlord? Return to account access
             </Link>
           ) : (
-            <Link to="/admin-signin" className="underline underline-offset-4 hover:text-fg">
+            <Link
+              to="/admin-signin"
+              className="underline underline-offset-4 hover:text-fg"
+            >
               Admin sign in
             </Link>
           )}

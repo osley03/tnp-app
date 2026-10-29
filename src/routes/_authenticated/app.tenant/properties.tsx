@@ -1,3 +1,5 @@
+import {TourDashboardLink} from '@/modules/virtual-tours/components/TourDashboardLink';
+import {PropertyPhoto} from '@/modules/virtual-tours/components/PropertyPhoto';
 import {externalTour} from '@/lib/external-tours';
 import {PropertyTourLink} from '@/modules/virtual-tours/components/PropertyTourLink';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
@@ -719,6 +721,7 @@ function TenantProperties() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const [externalValue,setExternalValue]=useState('');
+  const [tourProperty,setTourProperty]=useState<PropertyRecord|null>(null);
   const [tourOpen, setTourOpen] = useState(false);
 
   const [tourLoading, setTourLoading] = useState(false);
@@ -1173,10 +1176,11 @@ function TenantProperties() {
   /* ---------------------------------------------------------------------- */
 
   async function openTour(property: PropertyRecord) {
+    setTourProperty(property);
     const external=externalTour(text(property["tour_url"]));if(external){setExternalValue(external.url);return;}
     const linkedTour = tourIdFromUrl(text(property["tour_url"]), window.location.origin);
     if (linkedTour) {
-      window.open(tourLink(linkedTour, window.location.origin), "_blank", "noopener,noreferrer");
+      window.open(tourLink(linkedTour, window.location.origin)+"?property="+encodeURIComponent(propertyId(property)), "_blank", "noopener,noreferrer");
       return;
     }
     const id = propertyId(property);
@@ -2419,12 +2423,13 @@ function TenantProperties() {
       {/* 360° TOUR                                                          */}
       {/* ------------------------------------------------------------------ */}
 
-      <Dialog open={Boolean(externalValue)} onOpenChange={open=>{if(!open)setExternalValue('');}}><DialogContent className="max-h-[90svh] max-w-5xl overflow-y-auto bg-white text-slate-950"><DialogTitle>360° property tour</DialogTitle><DialogDescription>View the property through its external tour provider.</DialogDescription><PropertyTourLink value={externalValue}/></DialogContent></Dialog>
+      <Dialog open={Boolean(externalValue)} onOpenChange={open=>{if(!open)setExternalValue('');}}><DialogContent className="max-h-[90svh] max-w-5xl overflow-y-auto bg-white text-slate-950"><DialogTitle>360° property tour</DialogTitle><DialogDescription>View the property through its external tour provider.</DialogDescription><PropertyTourLink value={externalValue} imageUrl={tourProperty?(text(tourProperty["image_url"])||propertyImages(tourProperty)[0]):null} propertyTitle={tourProperty?propertyTitle(tourProperty):undefined}/></DialogContent></Dialog>
       {tourOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 p-3 sm:p-5">
           <div className="flex h-full max-h-[95vh] w-full max-w-7xl flex-col overflow-hidden rounded-2xl bg-slate-950 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-white">
               <div className="min-w-0">
+                <div className="mb-2"><TourDashboardLink/></div>
                 <p className="truncate text-sm font-semibold">
                   {tour?.title || "360° Property Tour"}
                 </p>
@@ -2443,7 +2448,8 @@ function TenantProperties() {
               </button>
             </div>
 
-            <div className="relative flex min-h-0 flex-1">
+            <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
+              {tourProperty&&<aside className="max-h-48 shrink-0 overflow-auto border-b border-white/10 p-3 lg:max-h-none lg:w-64 lg:border-b-0 lg:border-r"><PropertyPhoto imageUrl={text(tourProperty["image_url"])||propertyImages(tourProperty)[0]} title={propertyTitle(tourProperty)}/></aside>}
               {tourLoading && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950 text-white">
                   <div className="text-center">

@@ -11,7 +11,10 @@ export const Route = createFileRoute("/")({
         content:
           "Find your next rental, explore 360° room tours and connect with landlords through Tenant Network Profile.",
       },
-      { property: "og:title", content: "Welcome to TNP — Tenant Network Profile" },
+      {
+        property: "og:title",
+        content: "Welcome to TNP — Tenant Network Profile",
+      },
       {
         property: "og:description",
         content: "A clearer way to find a home and manage your rental journey.",
@@ -34,6 +37,10 @@ function Welcome() {
         fetchPriority="high"
       />
       <div className="tnp-welcome-shade" aria-hidden="true" />
+      <div className="tnp-welcome-atmosphere" aria-hidden="true">
+        <span />
+        <span />
+      </div>
       <header className="tnp-welcome-header">
         <Link to="/" className="tnp-welcome-brand" aria-label="TNP welcome">
           <span className="tnp-welcome-mark">
@@ -44,7 +51,11 @@ function Welcome() {
             <small>Tenant Network Profile</small>
           </span>
         </Link>
-        <Link to="/auth" search={{ mode: "signin" }} className="tnp-welcome-signin">
+        <Link
+          to="/auth"
+          search={{ mode: "signin" }}
+          className="tnp-welcome-signin"
+        >
           Sign in <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </header>
@@ -59,13 +70,19 @@ function Welcome() {
             <em>A space to belong.</em>
           </h1>
           <p className="tnp-welcome-description">
-            Discover a home that feels right. Connect with landlords, step inside with 360° tours,
-            and manage your rental journey in one place.
+            Discover a home that feels right. Connect with landlords, step
+            inside with 360° tours, and manage your rental journey in one place.
           </p>
-          <Link to="/auth" search={{ mode: "signup" }} className="tnp-welcome-continue">
+          <Link
+            to="/auth"
+            search={{ mode: "signup" }}
+            className="tnp-welcome-continue"
+          >
             Continue <ArrowRight size={21} aria-hidden="true" />
           </Link>
-          <p className="tnp-welcome-note">Create your account as a tenant or landlord.</p>
+          <p className="tnp-welcome-note">
+            Create your account as a tenant or landlord.
+          </p>
           <div className="tnp-welcome-features">
             <span>
               <KeyRound size={19} aria-hidden="true" />

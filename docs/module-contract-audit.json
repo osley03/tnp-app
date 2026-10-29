@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-26T12:45:44.602Z",
+  "checkedAt": "2026-10-29T08:08:36.883Z",
   "scope": "Static source/database contract audit against a locally migrated PostgreSQL database. This does not exercise every UI interaction.",
-  "moduleCount": 50,
+  "moduleCount": 51,
   "issues": [],
   "modules": [
     {
@@ -129,8 +129,16 @@
       "functions": []
     },
     {
+      "file": "src/modules/virtual-tours/components/PropertyTourLayout.tsx",
+      "tables": [
+        "properties"
+      ],
+      "functions": []
+    },
+    {
       "file": "src/modules/virtual-tours/components/TourLibrary.tsx",
       "tables": [
+        "properties",
         "tnp_tours"
       ],
       "functions": []

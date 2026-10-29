@@ -1,3 +1,5 @@
+import {TourDashboardLink} from '../components/TourDashboardLink';
+import {PropertyTourLayout} from '../components/PropertyTourLayout';
 import { useState, useRef, useEffect } from "react";
 import { TourCanvas } from "./TourCanvas";
 import { FloorPlan } from "../components/FloorPlan";
@@ -20,7 +22,7 @@ export function TourPlayer({ doc, embed = false }: { doc: TourDocument; embed?: 
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, []);
-  if (!scene) return <p className="p-8">This tour has no rooms.</p>;
+  if (!scene) return <main className="space-y-4 p-8">{!embed&&<TourDashboardLink/>}<p>This tour has no rooms.</p></main>;
   function navigate(id: string) {
     setCard(null);
     setArrival(null);
@@ -57,7 +59,7 @@ export function TourPlayer({ doc, embed = false }: { doc: TourDocument; embed?: 
       className={"tnp-tour-player" + (embed ? " tnp-tour-embed" : "")}
       style={{ "--tnp-tour-color": doc.settings.themeColor } as React.CSSProperties}
     >
-      <header>
+      <header className="flex-wrap gap-3">
         {doc.settings.logo?.url ? (
           <img src={doc.settings.logo.url} className="tnp-tour-brand" alt="Tour logo" />
         ) : (
@@ -69,7 +71,9 @@ export function TourPlayer({ doc, embed = false }: { doc: TourDocument; embed?: 
           {doc.settings.showTitle && <h1>{doc.title}</h1>}
           <p className="text-sm text-slate-300">{scene.name}</p>
         </div>
+        {!embed&&<TourDashboardLink/>}
       </header>
+      <PropertyTourLayout tourId={doc.id} embed={embed}>
       <div className="relative">
         <TourCanvas
           scene={scene}
@@ -143,6 +147,7 @@ export function TourPlayer({ doc, embed = false }: { doc: TourDocument; embed?: 
           </div>
         )}
       </div>
+      </PropertyTourLayout>
       {doc.settings.showThumbnails && (
         <nav className="tnp-tour-scenes" aria-label="Tour rooms">
           {doc.scenes.map((item) => (

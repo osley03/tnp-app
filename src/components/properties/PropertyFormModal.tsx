@@ -1,3 +1,4 @@
+import {PropertyPhoto} from '@/modules/virtual-tours/components/PropertyPhoto';
 import {externalTour} from '@/lib/external-tours';
 import {tourIdFromUrl} from '@/lib/tour-links';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -513,6 +514,7 @@ export function PropertyFormModal({
                   placeholder="https://..."
                 />
 
+                <div className="mt-4 max-w-md"><PropertyPhoto imageUrl={form.image_url} title={form.title||"Property photo"}/></div>
                 {!ownerControl ? <PropertyTourBuilder value={form.tour_url} title={form.title} onChange={value => update('tour_url', value)} onState={setTourState} /> : <div className="mt-5">
                   <Field
                     label="360° tour URL (optional)"

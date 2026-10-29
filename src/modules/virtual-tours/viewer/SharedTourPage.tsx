@@ -1,3 +1,4 @@
+import {TourDashboardLink} from '../components/TourDashboardLink';
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { readSharedTour } from "../api/tours";
@@ -33,6 +34,7 @@ export function SharedTourPage({ id }: { id: string }) {
         <a href="/" className="font-bold text-amber-200">
           TNP Virtual Tours
         </a>
+        {!embed&&<div className="mt-4"><TourDashboardLink/></div>}
         <h1 className="mt-4 text-xl font-bold">
           {query.isPending ? "Loading tour…" : "Open virtual tour"}
         </h1>

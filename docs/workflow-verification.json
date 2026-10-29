@@ -1,12 +1,49 @@
 {
-  "date": "2026-10-20T10:18:14.259Z",
-  "scope": "Local application and synthetic browser tests. No live payment or hosted deployment is certified.",
-  "passed": false,
+  "date": "2026-10-29T08:38:56.803Z",
+  "scope": "Current Desktop tnp-app. Local production build, isolated browser fixtures and local PostgreSQL tests. No live email delivery, merchant transaction or Vercel deployment certified.",
+  "passed": true,
   "results": [
     {
+      "check": "typecheck",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "regressions",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "database",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "check": "build",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
       "check": "role-browser",
-      "passed": false,
-      "exitCode": 1
+      "passed": true,
+      "count": 112
+    },
+    {
+      "check": "payment-browser",
+      "passed": true,
+      "count": 26
+    },
+    {
+      "check": "tenant-browser",
+      "passed": true,
+      "count": 13
     }
-  ]
+  ],
+  "amendments": [
+    "Scam report normalization, independent related-data loading, explicit retries and audit failure notices",
+    "Phone workspace/navigation theme consistency, readable inputs and contained tables",
+    "Truthful duplicate-email signup notices and verification resend cooldown",
+    "Welcome housing animation with reduced-motion and reduced-transparency support"
+  ],
+  "futureAdminOnboarding": "Owner-approved invitation, verified email, MFA and audit design documented only; no admin privileges granted."
 }

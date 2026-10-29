@@ -1,3 +1,6 @@
+import {PropertyPhoto} from './PropertyPhoto';
+import {propertyForTour,type LinkedProperty} from '../lib/property-media';
+import {TourDashboardLink} from '../components/TourDashboardLink';
 import {CaptureGuide} from './CaptureGuide';
 import { useRouteContext } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +29,10 @@ export function TourLibrary() {
       return result.data;
     },
   });
+  const linkedProperties=useQuery({queryKey:['tour-library-property-photos',user.id],queryFn:async()=>{
+const result=await supabase.from('properties').select('id,title,image_url,tour_url').eq('owner_id',user.id).not('tour_url','is',null);
+if(result.error)throw result.error;return result.data as LinkedProperty[];
+}});
   async function create(event: React.FormEvent) {
     event.preventDefault();
     if (!title.trim() || !files.length) return;
@@ -105,6 +112,7 @@ export function TourLibrary() {
   return (
     <main className="tnp-tour-studio p-4 sm:p-8">
       <div className="mx-auto max-w-6xl">
+        <div className="mb-5"><TourDashboardLink/></div>
         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
           TNP · Virtual Tour Studio
         </p>
@@ -174,6 +182,7 @@ export function TourLibrary() {
               ?.filter((tour) => tour.title.toLowerCase().includes(search.toLowerCase()))
               .map((tour) => (
                 <article key={tour.id} className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="mb-4"><PropertyPhoto imageUrl={propertyForTour(linkedProperties.data||[],tour.id)?.image_url} title={propertyForTour(linkedProperties.data||[],tour.id)?.title||tour.title}/></div>
                   <span className="text-xs font-semibold uppercase text-slate-500">
                     {tour.is_published ? tour.visibility : "Draft"}
                   </span>

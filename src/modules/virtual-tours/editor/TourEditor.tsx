@@ -1,3 +1,4 @@
+import {TourDashboardLink} from '../components/TourDashboardLink';
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { loadEditor, saveTour, addScenes } from "../api/tours";
@@ -159,6 +160,7 @@ export function TourEditor({ id }: { id: string }) {
         >
           ← Tours
         </a>
+        <TourDashboardLink onClick={event=>{if((history.dirty||password)&&!window.confirm("Leave without saving your tour changes?"))event.preventDefault();}}/>
         <strong className="mr-auto">{doc.title}</strong>
         <span className="text-xs">
           {history.dirty || password ? "Unsaved changes" : "Saved"} ·{" "}

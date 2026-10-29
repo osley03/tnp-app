@@ -1,3 +1,4 @@
+import { normalizeScamCase, scamDate } from "@/lib/scam-case-data";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -173,16 +174,13 @@ const TYPE_OPTIONS: {
 function formatLabel(value: string | null | undefined) {
   if (!value) return "—";
 
-  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatDate(value: string | null | undefined) {
-  if (!value) return "—";
-
-  return new Intl.DateTimeFormat("en-ZW", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return scamDate(value);
 }
 
 function formatMoney(value: number | null | undefined) {
@@ -254,9 +252,13 @@ function StatCard({
     <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 shadow-[0_15px_45px_rgba(0,0,0,0.15)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">{label}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+            {label}
+          </p>
 
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">{value}</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
+            {value}
+          </p>
 
           <p className="mt-1 text-xs text-zinc-500">{description}</p>
         </div>
@@ -269,7 +271,13 @@ function StatCard({
   );
 }
 
-function AuditTimeline({ actions, profiles }: { actions: CaseAction[]; profiles: Profile[] }) {
+function AuditTimeline({
+  actions,
+  profiles,
+}: {
+  actions: CaseAction[];
+  profiles: Profile[];
+}) {
   const profileMap = useMemo(
     () => new Map(profiles.map((profile) => [profile.id, profile])),
     [profiles],
@@ -300,21 +308,27 @@ function AuditTimeline({ actions, profiles }: { actions: CaseAction[]; profiles:
 
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-white">{formatLabel(action.action)}</span>
+                <span className="text-sm font-medium text-white">
+                  {formatLabel(action.action)}
+                </span>
 
                 {action.from_status && action.to_status && (
                   <span className="text-xs text-zinc-500">
-                    {formatLabel(action.from_status)} → {formatLabel(action.to_status)}
+                    {formatLabel(action.from_status)} →{" "}
+                    {formatLabel(action.to_status)}
                   </span>
                 )}
               </div>
 
               <p className="mt-1 text-xs text-zinc-500">
-                {admin?.full_name || "Administrator"} · {formatDate(action.created_at)}
+                {admin?.full_name || "Administrator"} ·{" "}
+                {formatDate(action.created_at)}
               </p>
 
               {action.reason && (
-                <p className="mt-2 text-sm leading-6 text-zinc-400">{action.reason}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                  {action.reason}
+                </p>
               )}
             </div>
           </div>
@@ -328,12 +342,14 @@ function CaseInspection({
   scamCase,
   profiles,
   actions,
+  auditUnavailable,
   onClose,
   onRefresh,
 }: {
   scamCase: EnrichedCase;
   profiles: Profile[];
   actions: CaseAction[];
+  auditUnavailable: boolean;
   onClose: () => void;
   onRefresh: () => void;
 }) {
@@ -347,28 +363,56 @@ function CaseInspection({
     [profiles],
   );
 
-  async function performAction(action: string, value: string, actionReason: string | null = null) {
+  async function performAction(
+    action: string,
+    value: string,
+    actionReason: string | null = null,
+  ) {
     if (saving) return;
     setSaving(true);
     try {
-      const { error } = await supabase.rpc("tnp_admin_case_action" as never, {
-        p_case_id: scamCase.id, p_action: action, p_value: value, p_reason: actionReason,
-      } as never);
+      const { error } = await supabase.rpc(
+        "tnp_admin_case_action" as never,
+        {
+          p_case_id: scamCase.id,
+          p_action: action,
+          p_value: value,
+          p_reason: actionReason,
+        } as never,
+      );
       if (error) throw new Error(error.message);
-      setReason(""); onRefresh();
+      setReason("");
+      onRefresh();
     } catch (cause) {
-      window.alert(cause instanceof Error ? cause.message : "The case could not be updated.");
-    } finally { setSaving(false); }
+      window.alert(
+        cause instanceof Error
+          ? cause.message
+          : "The case could not be updated.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
   async function changeStatus(nextStatus: ScamStatus) {
-    if (nextStatus !== scamCase.status) await performAction("status_changed", nextStatus, reason.trim() || null);
+    if (nextStatus !== scamCase.status)
+      await performAction("status_changed", nextStatus, reason.trim() || null);
   }
   async function changePriority(nextPriority: ScamPriority) {
-    if (nextPriority !== scamCase.priority) await performAction("priority_changed", nextPriority, reason.trim() || null);
+    if (nextPriority !== scamCase.priority)
+      await performAction(
+        "priority_changed",
+        nextPriority,
+        reason.trim() || null,
+      );
   }
-  async function saveNotes() { await performAction("note_added", notes.trim()); }
+  async function saveNotes() {
+    await performAction("note_added", notes.trim());
+  }
   async function saveResolution() {
-    if (resolution.trim().length < 10) { window.alert("Describe the resolution in at least ten characters."); return; }
+    if (resolution.trim().length < 10) {
+      window.alert("Describe the resolution in at least ten characters.");
+      return;
+    }
     await performAction("resolved", resolution.trim());
   }
 
@@ -396,9 +440,13 @@ function CaseInspection({
               </span>
             </div>
 
-            <h2 className="mt-2 text-xl font-semibold text-white">{scamCase.title}</h2>
+            <h2 className="mt-2 text-xl font-semibold text-white">
+              {scamCase.title}
+            </h2>
 
-            <p className="mt-1 font-mono text-xs text-zinc-600">{scamCase.id}</p>
+            <p className="mt-1 font-mono text-xs text-zinc-600">
+              {scamCase.id}
+            </p>
           </div>
 
           <button
@@ -410,7 +458,28 @@ function CaseInspection({
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          {scamCase.source === "public" && <section className="mb-6 rounded-2xl border border-white/15 bg-white/5 p-5"><h3 className="font-semibold text-white">Public report</h3><p className="mt-2 break-all text-sm text-zinc-300">Case reference: {scamCase.reference}</p><p className="mt-2 text-sm text-zinc-300">Reporter: {scamCase.reporter_name || "Not provided"}</p><p className="mt-2 break-all text-sm text-zinc-300">Email: {scamCase.reporter_email || "Not provided"}</p><p className="mt-2 text-sm text-zinc-300">Phone: {scamCase.reporter_phone || "Not provided"}</p><p className="mt-3 text-xs text-zinc-400">The reporter can check status and the final resolution using their private tracking receipt. Administrative notes stay private.</p></section>}
+          {scamCase.source === "public" && (
+            <section className="mb-6 rounded-2xl border border-white/15 bg-white/5 p-5">
+              <h3 className="font-semibold text-white">Public report</h3>
+              <p className="mt-2 break-all text-sm text-zinc-300">
+                Case reference: {scamCase.reference}
+              </p>
+              <p className="mt-2 text-sm text-zinc-300">
+                Reporter: {scamCase.reporter_name || "Not provided"}
+              </p>
+              <p className="mt-2 break-all text-sm text-zinc-300">
+                Email: {scamCase.reporter_email || "Not provided"}
+              </p>
+              <p className="mt-2 text-sm text-zinc-300">
+                Phone: {scamCase.reporter_phone || "Not provided"}
+              </p>
+              <p className="mt-3 text-xs text-zinc-400">
+                The reporter can check status and the final resolution using
+                their private tracking receipt. Administrative notes stay
+                private.
+              </p>
+            </section>
+          )}
 
           <div className="space-y-6">
             <section>
@@ -436,7 +505,9 @@ function CaseInspection({
                 </span>
               </div>
 
-              <p className="mt-4 text-sm leading-7 text-zinc-300">{scamCase.description}</p>
+              <p className="mt-4 text-sm leading-7 text-zinc-300">
+                {scamCase.description}
+              </p>
             </section>
 
             <section className="rounded-2xl border border-red-400/10 bg-red-400/[0.025] p-5">
@@ -448,7 +519,9 @@ function CaseInspection({
 
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Amount Lost</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Amount Lost
+                  </p>
 
                   <p className="mt-1 text-xl font-semibold text-red-300">
                     {formatMoney(scamCase.amount_lost_usd)}
@@ -456,7 +529,9 @@ function CaseInspection({
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Payment Method</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Payment Method
+                  </p>
 
                   <p className="mt-1 text-sm text-zinc-300">
                     {scamCase.payment_method || "Not provided"}
@@ -464,7 +539,9 @@ function CaseInspection({
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Reference</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Reference
+                  </p>
 
                   <p className="mt-1 break-all font-mono text-xs text-zinc-400">
                     {scamCase.payment_reference || "Not provided"}
@@ -493,7 +570,9 @@ function CaseInspection({
 
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {reporter?.full_name || scamCase.reporter_name || "Anonymous reporter"}
+                        {reporter?.full_name ||
+                          scamCase.reporter_name ||
+                          "Anonymous reporter"}
                       </p>
 
                       <p className="text-xs text-zinc-500">
@@ -511,7 +590,9 @@ function CaseInspection({
                 </div>
 
                 <div className="rounded-xl border border-red-400/10 bg-red-400/[0.02] p-4">
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Reported Scammer</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Reported Scammer
+                  </p>
 
                   <div className="mt-3 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-400/10 text-xs font-semibold text-red-300">
@@ -520,7 +601,9 @@ function CaseInspection({
 
                     <div>
                       <p className="text-sm font-medium text-white">
-                        {scammer?.full_name || scamCase.scammer_name || "Unknown"}
+                        {scammer?.full_name ||
+                          scamCase.scammer_name ||
+                          "Unknown"}
                       </p>
 
                       <p className="text-xs text-zinc-500">
@@ -537,7 +620,9 @@ function CaseInspection({
                   )}
 
                   {scamCase.scammer_email && (
-                    <p className="mt-2 break-all text-xs text-zinc-500">{scamCase.scammer_email}</p>
+                    <p className="mt-2 break-all text-xs text-zinc-500">
+                      {scamCase.scammer_email}
+                    </p>
                   )}
 
                   {scamCase.identification_number && (
@@ -558,7 +643,9 @@ function CaseInspection({
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Property</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Property
+                  </p>
 
                   <p className="mt-1 text-sm text-zinc-300">
                     {scamCase.property?.title || "No linked property"}
@@ -572,7 +659,9 @@ function CaseInspection({
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Location</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Location
+                  </p>
 
                   <p className="mt-1 text-sm text-zinc-300">
                     {scamCase.location || "Not provided"}
@@ -580,9 +669,13 @@ function CaseInspection({
                 </div>
 
                 <div className="sm:col-span-2">
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Address</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Address
+                  </p>
 
-                  <p className="mt-1 text-sm text-zinc-300">{scamCase.address || "Not provided"}</p>
+                  <p className="mt-1 text-sm text-zinc-300">
+                    {scamCase.address || "Not provided"}
+                  </p>
                 </div>
               </div>
             </section>
@@ -636,7 +729,9 @@ function CaseInspection({
                   <select
                     value={scamCase.status}
                     disabled={saving}
-                    onChange={(event) => changeStatus(event.target.value as ScamStatus)}
+                    onChange={(event) =>
+                      changeStatus(event.target.value as ScamStatus)
+                    }
                     className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#d4af37]/50"
                   >
                     {STATUS_OPTIONS.map((option) => (
@@ -648,12 +743,16 @@ function CaseInspection({
                 </div>
 
                 <div>
-                  <label className="text-xs uppercase tracking-wider text-zinc-600">Priority</label>
+                  <label className="text-xs uppercase tracking-wider text-zinc-600">
+                    Priority
+                  </label>
 
                   <select
                     value={scamCase.priority}
                     disabled={saving}
-                    onChange={(event) => changePriority(event.target.value as ScamPriority)}
+                    onChange={(event) =>
+                      changePriority(event.target.value as ScamPriority)
+                    }
                     className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#d4af37]/50"
                   >
                     {PRIORITY_OPTIONS.map((option) => (
@@ -741,6 +840,7 @@ function CaseInspection({
               </div>
 
               <textarea
+                aria-label="Case resolution"
                 value={resolution}
                 onChange={(event) => setResolution(event.target.value)}
                 rows={4}
@@ -771,30 +871,51 @@ function CaseInspection({
               <div className="mb-4 flex items-center gap-2">
                 <Clock3 className="h-4 w-4 text-[#d4af37]" />
 
-                <h3 className="font-medium text-white">Investigation Audit Trail</h3>
+                <h3 className="font-medium text-white">
+                  Investigation Audit Trail
+                </h3>
               </div>
 
-              <AuditTimeline actions={actions} profiles={profiles} />
+              {auditUnavailable ? (
+                <p role="alert" className="text-sm text-amber-200">
+                  The audit trail could not be loaded. Refresh to retry; this
+                  does not mean the case has no activity.
+                </p>
+              ) : (
+                <AuditTimeline actions={actions} profiles={profiles} />
+              )}
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Case Created</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Case Created
+                  </p>
 
-                  <p className="mt-1 text-sm text-zinc-400">{formatDate(scamCase.created_at)}</p>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {formatDate(scamCase.created_at)}
+                  </p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Last Updated</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Last Updated
+                  </p>
 
-                  <p className="mt-1 text-sm text-zinc-400">{formatDate(scamCase.updated_at)}</p>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {formatDate(scamCase.updated_at)}
+                  </p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-600">Case ID</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-600">
+                    Case ID
+                  </p>
 
-                  <p className="mt-1 break-all font-mono text-xs text-zinc-500">{scamCase.id}</p>
+                  <p className="mt-1 break-all font-mono text-xs text-zinc-500">
+                    {scamCase.id}
+                  </p>
                 </div>
               </div>
             </section>
@@ -816,19 +937,26 @@ function AdminScamCases() {
 
   const casesQuery = useQuery({
     queryKey: ["admin-scam-cases"],
+    retry: 1,
     queryFn: async () => {
-      const { data, error } = await untypedDb.from("scam_cases").select("*").order("created_at", {
-        ascending: false,
-      });
+      const { data, error } = await untypedDb
+        .from("scam_cases")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
       if (error) throw error;
 
-      return (data || []) as ScamCase[];
+      return (Array.isArray(data) ? data : [])
+        .map(normalizeScamCase)
+        .filter(Boolean) as unknown as ScamCase[];
     },
   });
 
   const profilesQuery = useQuery({
     queryKey: ["admin-scam-case-profiles"],
+    retry: 1,
     queryFn: async () => {
       const { data, error } = await db
         .from("profiles")
@@ -842,6 +970,7 @@ function AdminScamCases() {
 
   const propertiesQuery = useQuery({
     queryKey: ["admin-scam-case-properties"],
+    retry: 1,
     queryFn: async () => {
       const { data, error } = await db
         .from("properties")
@@ -855,6 +984,7 @@ function AdminScamCases() {
 
   const actionsQuery = useQuery({
     queryKey: ["admin-scam-case-actions"],
+    retry: 1,
     queryFn: async () => {
       const { data, error } = await untypedDb
         .from("scam_case_admin_actions")
@@ -875,9 +1005,13 @@ function AdminScamCases() {
   const actions = actionsQuery.data || [];
 
   const enrichedCases = useMemo<EnrichedCase[]>(() => {
-    const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
+    const profileMap = new Map(
+      profiles.map((profile) => [profile.id, profile]),
+    );
 
-    const propertyMap = new Map(properties.map((property) => [property.id, property]));
+    const propertyMap = new Map(
+      properties.map((property) => [property.id, property]),
+    );
 
     return cases.map((scamCase) => ({
       ...scamCase,
@@ -913,11 +1047,14 @@ function AdminScamCases() {
         scamCase.scammer?.full_name?.toLowerCase().includes(query) ||
         scamCase.property?.title?.toLowerCase().includes(query);
 
-      const matchesStatus = statusFilter === "all" || scamCase.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || scamCase.status === statusFilter;
 
-      const matchesPriority = priorityFilter === "all" || scamCase.priority === priorityFilter;
+      const matchesPriority =
+        priorityFilter === "all" || scamCase.priority === priorityFilter;
 
-      const matchesType = typeFilter === "all" || scamCase.case_type === typeFilter;
+      const matchesType =
+        typeFilter === "all" || scamCase.case_type === typeFilter;
 
       return matchesSearch && matchesStatus && matchesPriority && matchesType;
     });
@@ -932,18 +1069,27 @@ function AdminScamCases() {
   const stats = useMemo(() => {
     const active = cases.filter(
       (item) =>
-        item.status !== "resolved" && item.status !== "closed" && item.status !== "dismissed",
+        item.status !== "resolved" &&
+        item.status !== "closed" &&
+        item.status !== "dismissed",
     ).length;
 
-    const critical = cases.filter((item) => item.priority === "critical").length;
+    const critical = cases.filter(
+      (item) => item.priority === "critical",
+    ).length;
 
-    const escalated = cases.filter((item) => item.status === "escalated").length;
+    const escalated = cases.filter(
+      (item) => item.status === "escalated",
+    ).length;
 
     const resolved = cases.filter(
       (item) => item.status === "resolved" || item.status === "closed",
     ).length;
 
-    const totalLoss = cases.reduce((sum, item) => sum + Number(item.amount_lost_usd || 0), 0);
+    const totalLoss = cases.reduce(
+      (sum, item) => sum + Number(item.amount_lost_usd || 0),
+      0,
+    );
 
     return {
       total: cases.length,
@@ -955,14 +1101,11 @@ function AdminScamCases() {
     };
   }, [cases]);
 
-  const loading =
-    casesQuery.isLoading ||
-    profilesQuery.isLoading ||
-    propertiesQuery.isLoading ||
-    actionsQuery.isLoading;
+  const loading = casesQuery.isLoading;
 
-  const error =
-    casesQuery.error || profilesQuery.error || propertiesQuery.error || actionsQuery.error;
+  const error = casesQuery.error;
+  const relatedError =
+    profilesQuery.error || propertiesQuery.error || actionsQuery.error;
 
   async function refreshAll() {
     await Promise.all([
@@ -1005,7 +1148,8 @@ function AdminScamCases() {
                 </h1>
 
                 <p className="mt-1 text-sm text-zinc-500">
-                  Investigate and manage property, land and payment scam reports.
+                  Investigate and manage property, land and payment scam
+                  reports.
                 </p>
               </div>
             </div>
@@ -1021,15 +1165,27 @@ function AdminScamCases() {
           </button>
         </div>
 
+        {relatedError && (
+          <p
+            role="alert"
+            className="mb-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100"
+          >
+            Some profile, property or audit details could not load. Reports are
+            still available. Use Refresh to retry those details.
+          </p>
+        )}
         {error && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-400/20 bg-red-400/[0.06] p-4">
             <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
 
             <div>
-              <p className="font-medium text-red-300">Unable to load scam cases</p>
+              <p className="font-medium text-red-300">
+                Unable to load scam cases
+              </p>
 
               <p className="mt-1 text-sm text-red-300/70">
-                {(error as Error)?.message || "An unexpected database error occurred."}
+                {(error as Error)?.message ||
+                  "An unexpected database error occurred."}
               </p>
             </div>
           </div>
@@ -1166,8 +1322,21 @@ function AdminScamCases() {
               <div className="text-center">
                 <Loader2 className="mx-auto h-7 w-7 animate-spin text-[#d4af37]" />
 
-                <p className="mt-3 text-sm text-zinc-500">Loading scam cases...</p>
+                <p className="mt-3 text-sm text-zinc-500">
+                  Loading scam cases...
+                </p>
               </div>
+            </div>
+          ) : casesQuery.error ? (
+            <div role="alert" className="p-8 text-center">
+              <p className="text-white">Scam reports could not be loaded.</p>
+              <button
+                type="button"
+                onClick={() => void casesQuery.refetch()}
+                className="mt-4 rounded-lg border border-white/20 px-4 py-3 text-white"
+              >
+                Retry reports
+              </button>
             </div>
           ) : filteredCases.length === 0 ? (
             <div className="flex min-h-[340px] items-center justify-center px-6">
@@ -1176,7 +1345,9 @@ function AdminScamCases() {
                   <ShieldCheck className="h-6 w-6 text-zinc-600" />
                 </div>
 
-                <h3 className="mt-4 font-medium text-white">No scam cases found</h3>
+                <h3 className="mt-4 font-medium text-white">
+                  No scam cases found
+                </h3>
 
                 <p className="mt-2 text-sm leading-6 text-zinc-600">
                   No reports match your current search and filter settings.
@@ -1197,7 +1368,9 @@ function AdminScamCases() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate font-medium text-white">{scamCase.title}</h3>
+                      <h3 className="truncate font-medium text-white">
+                        {scamCase.title}
+                      </h3>
 
                       <span
                         className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${priorityClasses(
@@ -1219,7 +1392,11 @@ function AdminScamCases() {
                     <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-600">
                       <span>{formatLabel(scamCase.case_type)}</span>
 
-                      <span>{scamCase.reporter?.full_name || scamCase.reporter_name || "Anonymous reporter"}</span>
+                      <span>
+                        {scamCase.reporter?.full_name ||
+                          scamCase.reporter_name ||
+                          "Anonymous reporter"}
+                      </span>
 
                       <span>Loss: {formatMoney(scamCase.amount_lost_usd)}</span>
 
@@ -1250,10 +1427,13 @@ function AdminScamCases() {
               <FileSearch className="h-5 w-5 text-[#d4af37]" />
 
               <div>
-                <p className="text-sm font-medium text-white">Evidence-led Investigation</p>
+                <p className="text-sm font-medium text-white">
+                  Evidence-led Investigation
+                </p>
 
                 <p className="mt-1 text-xs leading-5 text-zinc-600">
-                  Review payment details, identity information, locations and attached evidence.
+                  Review payment details, identity information, locations and
+                  attached evidence.
                 </p>
               </div>
             </div>
@@ -1264,10 +1444,13 @@ function AdminScamCases() {
               <ShieldCheck className="h-5 w-5 text-[#d4af37]" />
 
               <div>
-                <p className="text-sm font-medium text-white">Protected Audit Trail</p>
+                <p className="text-sm font-medium text-white">
+                  Protected Audit Trail
+                </p>
 
                 <p className="mt-1 text-xs leading-5 text-zinc-600">
-                  Administrative decisions and case changes are recorded for accountability.
+                  Administrative decisions and case changes are recorded for
+                  accountability.
                 </p>
               </div>
             </div>
@@ -1278,10 +1461,13 @@ function AdminScamCases() {
               <CheckCircle2 className="h-5 w-5 text-[#d4af37]" />
 
               <div>
-                <p className="text-sm font-medium text-white">Victim Resolution</p>
+                <p className="text-sm font-medium text-white">
+                  Victim Resolution
+                </p>
 
                 <p className="mt-1 text-xs leading-5 text-zinc-600">
-                  Track investigation outcomes, resolutions and final case status.
+                  Track investigation outcomes, resolutions and final case
+                  status.
                 </p>
               </div>
             </div>
@@ -1291,9 +1477,11 @@ function AdminScamCases() {
 
       {selectedCase && (
         <CaseInspection
+          key={selectedCase.id}
           scamCase={selectedCase}
           profiles={profiles}
           actions={selectedActions}
+          auditUnavailable={Boolean(actionsQuery.error)}
           onClose={() => setSelectedId(null)}
           onRefresh={refreshAll}
         />
