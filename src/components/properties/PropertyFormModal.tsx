@@ -1,8 +1,10 @@
-import {PropertyPhoto} from '@/modules/virtual-tours/components/PropertyPhoto';
-import {externalTour} from '@/lib/external-tours';
-import {tourIdFromUrl} from '@/lib/tour-links';
-import { useEffect, useId, useRef, useState } from 'react';
-import { PropertyTourBuilder } from '@/modules/virtual-tours/components/PropertyTourBuilder';
+import { PropertyPhotoUpload } from "./PropertyPhotoUpload";
+import { verifyPropertyImage } from "@/lib/property-image-url";
+import { PropertyPhoto } from "@/modules/virtual-tours/components/PropertyPhoto";
+import { externalTour } from "@/lib/external-tours";
+import { tourIdFromUrl } from "@/lib/tour-links";
+import { useEffect, useId, useRef, useState } from "react";
+import { PropertyTourBuilder } from "@/modules/virtual-tours/components/PropertyTourBuilder";
 import { createPortal } from "react-dom";
 import type * as React from "react";
 import {
@@ -122,7 +124,13 @@ const PROPERTY_TYPES: Record<string, string[]> = {
     "Commercial Stand",
     "Commercial Building",
   ],
-  Agricultural: ["Farm", "Agricultural Land", "Ranch", "Smallholding", "Horticultural Land"],
+  Agricultural: [
+    "Farm",
+    "Agricultural Land",
+    "Ranch",
+    "Smallholding",
+    "Horticultural Land",
+  ],
   Land: [
     "Residential Stand",
     "Commercial Stand",
@@ -130,11 +138,28 @@ const PROPERTY_TYPES: Record<string, string[]> = {
     "Vacant Land",
     "Agricultural Land",
   ],
-  Industrial: ["Warehouse", "Factory", "Workshop", "Industrial Building", "Industrial Stand"],
-  Other: ["Mixed Use", "Guest House", "Lodge", "Institutional Property", "Other"],
+  Industrial: [
+    "Warehouse",
+    "Factory",
+    "Workshop",
+    "Industrial Building",
+    "Industrial Stand",
+  ],
+  Other: [
+    "Mixed Use",
+    "Guest House",
+    "Lodge",
+    "Institutional Property",
+    "Other",
+  ],
 };
 
-export const LISTING_TYPES = ["For Rent", "For Sale", "For Lease", "For Rent or Sale"];
+export const LISTING_TYPES = [
+  "For Rent",
+  "For Sale",
+  "For Lease",
+  "For Rent or Sale",
+];
 
 const SIZE_UNITS = ["m²", "ha", "acres", "km²"];
 
@@ -174,33 +199,70 @@ export function PropertyFormModal({
   onSubmit: (event: React.FormEvent) => void;
   ownerControl?: React.ReactNode;
 }) {
-  const dialogRef=useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const [imageBusy, setImageBusy] = useState(false);
+  const [imageError, setImageError] = useState("");
   const [tourState, setTourState] = useState({ busy: false, dirty: false });
-  const [tourInputError,setTourInputError]=useState('');
+  const [tourInputError, setTourInputError] = useState("");
   function closeForm() {
-    if (saving || tourState.busy) return;
-    if (tourState.dirty && !window.confirm('Close without saving your latest tour edits? Previously saved rooms remain in My tours.')) return;
+    if (saving || imageBusy || tourState.busy) return;
+    if (
+      tourState.dirty &&
+      !window.confirm(
+        "Close without saving your latest tour edits? Previously saved rooms remain in My tours.",
+      )
+    )
+      return;
     onClose();
   }
-  const closeRef=useRef({saving,onClose:closeForm}); closeRef.current={saving:saving || tourState.busy,onClose:closeForm};
-  useEffect(()=>{
-    const previous=document.activeElement as HTMLElement|null;
-    const dialog=dialogRef.current;
-    const focusable=()=>Array.from(dialog?.querySelectorAll<HTMLElement>('button,input,select,textarea,a[href],[tabindex="0"]')??[]).filter(el=>!el.hasAttribute('disabled')&&el.getClientRects().length>0);
+  const closeRef = useRef({ saving, onClose: closeForm });
+  closeRef.current = {
+    saving: saving || imageBusy || tourState.busy,
+    onClose: closeForm,
+  };
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    const focusable = () =>
+      Array.from(
+        dialog?.querySelectorAll<HTMLElement>(
+          'button,input,select,textarea,a[href],[tabindex="0"]',
+        ) ?? [],
+      ).filter(
+        (el) => !el.hasAttribute("disabled") && el.getClientRects().length > 0,
+      );
     focusable()[0]?.focus();
-    const keydown=(event:KeyboardEvent)=>{
-      if(event.key==='Escape'&&!closeRef.current.saving){event.preventDefault();closeRef.current.onClose();}
-      if(event.key==='Tab'){
-        const items=focusable(),first=items[0],last=items.at(-1);
-        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
-        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !closeRef.current.saving) {
+        event.preventDefault();
+        closeRef.current.onClose();
+      }
+      if (event.key === "Tab") {
+        const items = focusable(),
+          first = items[0],
+          last = items.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
       }
     };
-    dialog?.addEventListener('keydown',keydown);
-    const overflow=document.body.style.overflow;document.body.style.overflow='hidden';
-    return()=>{dialog?.removeEventListener('keydown',keydown);document.body.style.overflow=overflow;previous?.focus();};
-  },[]);
-  function update<K extends keyof PropertyForm>(key: K, value: PropertyForm[K]) {
+    dialog?.addEventListener("keydown", keydown);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog?.removeEventListener("keydown", keydown);
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, []);
+  function update<K extends keyof PropertyForm>(
+    key: K,
+    value: PropertyForm[K],
+  ) {
     setForm((current) => ({
       ...current,
       [key]: value,
@@ -215,15 +277,24 @@ export function PropertyFormModal({
     form.listing_type === "For Lease" ||
     form.listing_type === "For Rent or Sale";
 
-  const needsSale = form.listing_type === "For Sale" || form.listing_type === "For Rent or Sale";
+  const needsSale =
+    form.listing_type === "For Sale" ||
+    form.listing_type === "For Rent or Sale";
 
   const landRelated =
-    form.property_category === "Land" || form.property_category === "Agricultural";
+    form.property_category === "Land" ||
+    form.property_category === "Agricultural";
 
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="tnp-property-overlay fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-slate-950/60 p-3 backdrop-blur-sm sm:p-6">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={editing ? "Edit property" : "Add property"} className="tnp-property-dialog tnp-property-form flex max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white text-slate-950 shadow-2xl sm:max-h-[calc(100dvh-3rem)]">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={editing ? "Edit property" : "Add property"}
+        className="tnp-property-dialog tnp-property-form flex max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white text-slate-950 shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
@@ -236,7 +307,8 @@ export function PropertyFormModal({
             </h2>
 
             <p className="mt-1 text-xs text-slate-500">
-              Add accurate listing information so TNP can present the property correctly.
+              Add accurate listing information so TNP can present the property
+              correctly.
             </p>
           </div>
 
@@ -244,14 +316,57 @@ export function PropertyFormModal({
             type="button"
             onClick={closeForm}
             aria-label="Close property form"
-            disabled={saving || tourState.busy}
+            disabled={saving || imageBusy || tourState.busy}
             className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={event => { if (tourState.busy || tourState.dirty) { event.preventDefault(); return; } if(form.tour_url.trim()&&!tourIdFromUrl(form.tour_url.trim(),window.location.origin)&&!externalTour(form.tour_url)){event.preventDefault();setTourInputError('Use a TNP tour URL, public Kuula share link or Matterport show link.');return;}setTourInputError('');onSubmit(event); }} className="tnp-property-form min-h-0 overflow-y-auto text-slate-950">{tourInputError&&<p role="alert" className="m-4 rounded-lg bg-red-50 p-3 text-red-800">{tourInputError}</p>}
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (imageBusy || tourState.busy || tourState.dirty) {
+              event.preventDefault();
+              return;
+            }
+            if (
+              form.tour_url.trim() &&
+              !tourIdFromUrl(form.tour_url.trim(), window.location.origin) &&
+              !externalTour(form.tour_url)
+            ) {
+              event.preventDefault();
+              setTourInputError(
+                "Use a TNP tour URL, public Kuula share link or Matterport show link.",
+              );
+              return;
+            }
+            setTourInputError("");
+            setImageError("");
+            setImageBusy(true);
+            try {
+              await verifyPropertyImage(form.image_url);
+              onSubmit(event);
+            } catch (error) {
+              setImageError(
+                error instanceof Error
+                  ? error.message
+                  : "Choose a working exterior photo.",
+              );
+            } finally {
+              setImageBusy(false);
+            }
+          }}
+          className="tnp-property-form min-h-0 overflow-y-auto text-slate-950"
+        >
+          {tourInputError && (
+            <p
+              role="alert"
+              className="m-4 rounded-lg bg-red-50 p-3 text-red-800"
+            >
+              {tourInputError}
+            </p>
+          )}
           <div className="space-y-7 p-6">
             {ownerControl}
             {errorMessage && (
@@ -283,7 +398,8 @@ export function PropertyFormModal({
                   required
                   value={form.property_category}
                   onChange={(value) => {
-                    const types = PROPERTY_TYPES[value] ?? PROPERTY_TYPES["Other"] ?? [];
+                    const types =
+                      PROPERTY_TYPES[value] ?? PROPERTY_TYPES["Other"] ?? [];
 
                     update("property_category", value);
 
@@ -385,63 +501,67 @@ export function PropertyFormModal({
             </section>
 
             {/* Keep optional specifications out of the essential listing flow. */}
-            <details className="rounded-2xl border border-slate-200 p-4" open={editing || landRelated}>
-              <summary className="cursor-pointer font-semibold text-slate-900">Optional details: size, rooms and zoning</summary>
-            <section className="mt-4">
-              <FormSectionTitle
-                title="Property Specifications"
-                description="Only provide the specifications that make sense for this property."
-              />
-
-              <div className="mt-4 grid gap-5 md:grid-cols-3">
-                <Field
-                  label="Property size"
-                  type="number"
-                  value={form.size}
-                  onChange={(value) => update("size", value)}
-                  placeholder="600"
+            <details
+              className="rounded-2xl border border-slate-200 p-4"
+              open={editing || landRelated}
+            >
+              <summary className="cursor-pointer font-semibold text-slate-900">
+                Optional details: size, rooms and zoning
+              </summary>
+              <section className="mt-4">
+                <FormSectionTitle
+                  title="Property Specifications"
+                  description="Only provide the specifications that make sense for this property."
                 />
 
-                <SelectField
-                  label="Size unit"
-                  value={form.size_unit}
-                  onChange={(value) => update("size_unit", value)}
-                  options={SIZE_UNITS}
-                />
+                <div className="mt-4 grid gap-5 md:grid-cols-3">
+                  <Field
+                    label="Property size"
+                    type="number"
+                    value={form.size}
+                    onChange={(value) => update("size", value)}
+                    placeholder="600"
+                  />
 
-                <Field
-                  label="Rooms"
-                  type="number"
-                  value={form.rooms}
-                  onChange={(value) => update("rooms", value)}
-                  placeholder="6"
-                />
+                  <SelectField
+                    label="Size unit"
+                    value={form.size_unit}
+                    onChange={(value) => update("size_unit", value)}
+                    options={SIZE_UNITS}
+                  />
 
-                <Field
-                  label="Bedrooms"
-                  type="number"
-                  value={form.beds}
-                  onChange={(value) => update("beds", value)}
-                  placeholder="3"
-                />
+                  <Field
+                    label="Rooms"
+                    type="number"
+                    value={form.rooms}
+                    onChange={(value) => update("rooms", value)}
+                    placeholder="6"
+                  />
 
-                <Field
-                  label="Bathrooms"
-                  type="number"
-                  value={form.baths}
-                  onChange={(value) => update("baths", value)}
-                  placeholder="2"
-                />
+                  <Field
+                    label="Bedrooms"
+                    type="number"
+                    value={form.beds}
+                    onChange={(value) => update("beds", value)}
+                    placeholder="3"
+                  />
 
-                <Field
-                  label="Zoning"
-                  value={form.zoning}
-                  onChange={(value) => update("zoning", value)}
-                  placeholder="Residential"
-                />
-              </div>
-            </section>
+                  <Field
+                    label="Bathrooms"
+                    type="number"
+                    value={form.baths}
+                    onChange={(value) => update("baths", value)}
+                    placeholder="2"
+                  />
 
+                  <Field
+                    label="Zoning"
+                    value={form.zoning}
+                    onChange={(value) => update("zoning", value)}
+                    placeholder="Residential"
+                  />
+                </div>
+              </section>
             </details>
             {/* Land information */}
             {landRelated && (
@@ -466,7 +586,9 @@ export function PropertyFormModal({
                     options={["", ...TITLE_STATUSES]}
                     optionLabels={{
                       "": "Select status",
-                      ...Object.fromEntries(TITLE_STATUSES.map((item) => [item, item])),
+                      ...Object.fromEntries(
+                        TITLE_STATUSES.map((item) => [item, item]),
+                      ),
                     }}
                   />
                 </div>
@@ -477,7 +599,9 @@ export function PropertyFormModal({
                     title="Water available"
                     description="Borehole, municipal or other reliable water source."
                     enabled={form.water_available}
-                    onToggle={() => update("water_available", !form.water_available)}
+                    onToggle={() =>
+                      update("water_available", !form.water_available)
+                    }
                   />
 
                   <ToggleField
@@ -485,7 +609,12 @@ export function PropertyFormModal({
                     title="Electricity available"
                     description="Electricity connection or reliable supply."
                     enabled={form.electricity_available}
-                    onToggle={() => update("electricity_available", !form.electricity_available)}
+                    onToggle={() =>
+                      update(
+                        "electricity_available",
+                        !form.electricity_available,
+                      )
+                    }
                   />
 
                   <ToggleField
@@ -503,10 +632,17 @@ export function PropertyFormModal({
             <section>
               <FormSectionTitle
                 title="Property Media"
-                description="Use a publicly accessible image URL for the primary listing image."
+                description="Upload the outside view of your property or paste a direct image URL. The same photo appears on the listing and beside its tour."
               />
 
               <div className="mt-4">
+                <PropertyPhotoUpload
+                  onUploaded={(url) => {
+                    update("image_url", url);
+                    setImageError("");
+                  }}
+                  onBusyChange={setImageBusy}
+                />
                 <Field
                   label="Primary property image URL"
                   value={form.image_url}
@@ -514,26 +650,46 @@ export function PropertyFormModal({
                   placeholder="https://..."
                 />
 
-                <div className="mt-4 max-w-md"><PropertyPhoto imageUrl={form.image_url} title={form.title||"Property photo"}/></div>
-                {!ownerControl ? <PropertyTourBuilder value={form.tour_url} title={form.title} onChange={value => update('tour_url', value)} onState={setTourState} /> : <div className="mt-5">
-                  <Field
-                    label="360° tour URL (optional)"
-                    value={form.tour_url}
-                    onChange={(value) => update("tour_url", value)}
-                    placeholder="TNP, Kuula share or Matterport show URL"
-                  />
-                  <p className="mt-2 text-xs text-slate-600">
-                    Create a TNP room tour or paste a public Kuula / Matterport share link. Do not paste iframe code.
+                {imageError && (
+                  <p role="alert" className="mt-2 text-sm text-red-700">
+                    {imageError}
                   </p>
-                  <a
-                    href="/app/landlord/tours"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex rounded-lg bg-slate-900 px-4 py-3 text-xs font-semibold text-white"
-                  >
-                    Create a 360° tour ↗
-                  </a>
-                </div>}
+                )}
+                <div className="mt-4 max-w-md">
+                  <PropertyPhoto
+                    imageUrl={form.image_url}
+                    title={form.title || "Property photo"}
+                  />
+                </div>
+                {!ownerControl ? (
+                  <PropertyTourBuilder
+                    value={form.tour_url}
+                    title={form.title}
+                    onChange={(value) => update("tour_url", value)}
+                    onState={setTourState}
+                  />
+                ) : (
+                  <div className="mt-5">
+                    <Field
+                      label="360° tour URL (optional)"
+                      value={form.tour_url}
+                      onChange={(value) => update("tour_url", value)}
+                      placeholder="TNP, Kuula share or Matterport show URL"
+                    />
+                    <p className="mt-2 text-xs text-slate-600">
+                      Create a TNP room tour or paste a public Kuula /
+                      Matterport share link. Do not paste iframe code.
+                    </p>
+                    <a
+                      href="/app/landlord/tours"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex rounded-lg bg-slate-900 px-4 py-3 text-xs font-semibold text-white"
+                    >
+                      Create a 360° tour ↗
+                    </a>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -546,27 +702,36 @@ export function PropertyFormModal({
 
               <div className="mt-4 space-y-5">
                 <div>
-                  <label className="text-xs font-bold text-slate-700">Description</label>
+                  <label className="text-xs font-bold text-slate-700">
+                    Description
+                  </label>
 
                   <textarea
                     value={form.description}
-                    onChange={(event) => update("description", event.target.value)}
+                    onChange={(event) =>
+                      update("description", event.target.value)
+                    }
                     rows={5}
                     placeholder="Describe the property, location, security, utilities, access and important features..."
                     className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-slate-400"
                   />
 
                   <p className="mt-1.5 text-[11px] text-slate-400">
-                    Aim for at least 20 characters so the listing has enough useful information.
+                    Aim for at least 20 characters so the listing has enough
+                    useful information.
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700">Amenities</label>
+                  <label className="text-xs font-bold text-slate-700">
+                    Amenities
+                  </label>
 
                   <input
                     value={form.amenities}
-                    onChange={(event) => update("amenities", event.target.value)}
+                    onChange={(event) =>
+                      update("amenities", event.target.value)
+                    }
                     placeholder="WiFi, Parking, Borehole, Security, Garden"
                     className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none focus:border-slate-400"
                   />
@@ -594,13 +759,19 @@ export function PropertyFormModal({
                   onToggle={() => update("available", !form.available)}
                 />
 
-                {ownerControl ? <ToggleField
-                  icon={ShieldCheck}
-                  title="Verified listing"
-                  description="Verification state for the property listing."
-                  enabled={form.verified}
-                  onToggle={() => update("verified", !form.verified)}
-                /> : <p className="rounded-xl border border-slate-200 p-4 text-sm text-slate-600">Listing verification is managed by TNP administrators.</p>}
+                {ownerControl ? (
+                  <ToggleField
+                    icon={ShieldCheck}
+                    title="Verified listing"
+                    description="Verification state for the property listing."
+                    enabled={form.verified}
+                    onToggle={() => update("verified", !form.verified)}
+                  />
+                ) : (
+                  <p className="rounded-xl border border-slate-200 p-4 text-sm text-slate-600">
+                    Listing verification is managed by TNP administrators.
+                  </p>
+                )}
               </div>
             </section>
           </div>
@@ -610,7 +781,7 @@ export function PropertyFormModal({
             <button
               type="button"
               onClick={closeForm}
-              disabled={saving || tourState.busy}
+              disabled={saving || imageBusy || tourState.busy}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700"
             >
               Cancel
@@ -618,18 +789,36 @@ export function PropertyFormModal({
 
             <button
               type="submit"
-              disabled={saving || tourState.busy || tourState.dirty}
+              disabled={
+                saving || imageBusy || tourState.busy || tourState.dirty
+              }
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
 
-              {saving ? "Saving..." : editing ? "Save Changes" : "Create Property"}
+              {imageBusy
+                ? "Checking photo..."
+                : saving
+                  ? "Saving..."
+                  : editing
+                    ? "Save Changes"
+                    : "Create Property"}
             </button>
           </div>
-          {(tourState.busy || tourState.dirty) && <p role="status" className="bg-blue-50 px-6 pb-4 text-sm text-blue-900">{tourState.busy ? 'Wait for the room upload or tour save to finish.' : 'Save your tour progress or publish it before saving the property.'}</p>}
+          {(tourState.busy || tourState.dirty) && (
+            <p
+              role="status"
+              className="bg-blue-50 px-6 pb-4 text-sm text-blue-900"
+            >
+              {tourState.busy
+                ? "Wait for the room upload or tour save to finish."
+                : "Save your tour progress or publish it before saving the property."}
+            </p>
+          )}
         </form>
       </div>
-    </div>, document.body
+    </div>,
+    document.body,
   );
 }
 
@@ -637,7 +826,13 @@ export function PropertyFormModal({
 /* Form Components                                                            */
 /* -------------------------------------------------------------------------- */
 
-function FormSectionTitle({ title, description }: { title: string; description: string }) {
+function FormSectionTitle({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <div>
       <h3 className="font-bold text-slate-900">{title}</h3>
@@ -745,7 +940,9 @@ function ToggleField({
       <div className="flex items-start gap-3">
         <div
           className={`rounded-xl p-2 ${
-            enabled ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"
+            enabled
+              ? "bg-emerald-50 text-emerald-600"
+              : "bg-slate-100 text-slate-400"
           }`}
         >
           <Icon className="h-4 w-4" />
@@ -754,7 +951,9 @@ function ToggleField({
         <div>
           <p className="text-sm font-bold text-slate-800">{title}</p>
 
-          <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">{description}</p>
+          <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+            {description}
+          </p>
         </div>
       </div>
 
@@ -762,10 +961,16 @@ function ToggleField({
         type="button"
         onClick={onToggle}
         className={`shrink-0 rounded-full p-1 transition ${
-          enabled ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"
+          enabled
+            ? "bg-emerald-100 text-emerald-600"
+            : "bg-slate-100 text-slate-400"
         }`}
       >
-        {enabled ? <ToggleRight className="h-7 w-7" /> : <ToggleLeft className="h-7 w-7" />}
+        {enabled ? (
+          <ToggleRight className="h-7 w-7" />
+        ) : (
+          <ToggleLeft className="h-7 w-7" />
+        )}
       </button>
     </div>
   );

@@ -12,7 +12,7 @@ export function propertyForTour(
   const linked = rows.filter((row) => {
     try {
       return (
-        new URL(row.tour_url || "").pathname.replace(/\/$/, "") ===
+        new URL(row.tour_url || "", "https://tnp-app-alpha.vercel.app").pathname.replace(/\/$/, "") ===
         "/tours/" + tourId
       );
     } catch {

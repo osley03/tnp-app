@@ -127,7 +127,7 @@ export function AuthPage({
   useEffect(() => {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     if (fragment.has("error")) {
-      setMode("signin");
+      setMode(adminOnly ? "signin" : "signup");
       setMsg(
         "This verification link is invalid or expired. Request a new confirmation email below.",
       );
@@ -191,7 +191,7 @@ export function AuthPage({
 
         if (!data.session) {
           setMsg(registrationNotice(data));
-          setMode("signin");
+          setMode("signup");
           return;
         }
 
@@ -225,12 +225,12 @@ export function AuthPage({
         mode === "signup" &&
         ["user_already_exists", "email_exists"].includes(code)
       ) {
-        setMode("signin");
+        setMode("signup");
         setPassword("");
         setMsg(registrationNotice({ user: { identities: [] } }));
       } else if (code === "email_not_confirmed") {
         setMsg(
-          "Verify your email before signing in. Use Resend verification below.",
+          "Verify your email before signing in. Open Sign up to resend verification.",
         );
       } else
         setMsg(err instanceof Error ? err.message : "Something went wrong");
@@ -396,7 +396,7 @@ export function AuthPage({
                     : "Sign in"}
             </button>
           </form>
-          {!adminOnly && mode === "signin" && (
+          {!adminOnly && mode === "signup" && (
             <button
               type="button"
               disabled={busy || resendBusy || resendAfter > Date.now()}

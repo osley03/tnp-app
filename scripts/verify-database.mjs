@@ -194,6 +194,14 @@ await group('external tour allowlist preserves internal ownership checks',async(
  await assert.rejects(()=>asUser('landlord',()=>db.query('UPDATE public.properties SET tour_url=$1 WHERE id=$2',['https://tnp.example/tours/ffffffff-ffff-4fff-8fff-ffffffffffff',ids.property])));
  await asUser('landlord',()=>db.query('UPDATE public.properties SET tour_url=NULL WHERE id=$1',[ids.property]));
 });
+await group('exterior photo upload ownership and private-evidence separation',async()=>{
+const bucket=(await db.query("SELECT * FROM storage.buckets WHERE id='tnp-property-photos'")).rows[0];assert.equal(bucket.public,true);assert.equal(Number(bucket.file_size_limit),10485760);
+const object=ids.landlord+'/exterior.jpg';await asUser('landlord',()=>db.query("INSERT INTO storage.objects(bucket_id,name) VALUES('tnp-property-photos',$1)",[object]));
+await assert.rejects(()=>asUser('tenant',()=>db.query("INSERT INTO storage.objects(bucket_id,name) VALUES('tnp-property-photos',$1)",[ids.tenant+'/tenant.jpg'])));
+await assert.rejects(()=>asUser('other',()=>db.query("INSERT INTO storage.objects(bucket_id,name) VALUES('tnp-property-photos',$1)",[ids.landlord+'/other.jpg'])));
+assert.equal((await asUser('landlord',()=>db.query("DELETE FROM storage.objects WHERE bucket_id='tnp-property-photos' AND name=$1 RETURNING id",[object]))).rows.length,0);
+for(const id of ['tnp-panoramas','tnp-manual-receipts'])assert.equal((await db.query('SELECT public FROM storage.buckets WHERE id=$1',[id])).rows[0].public,false);
+});
 await group('account closure preserves evidence and rejects closed sessions',async()=>{
  await db.exec('BEGIN');async function rejected(fn){await db.exec('SAVEPOINT denied');try{await assert.rejects(fn);}finally{await db.exec('ROLLBACK TO SAVEPOINT denied');}}try{
  const before=(await db.query("SELECT (SELECT count(*) FROM public.leases) leases,(SELECT count(*) FROM public.lease_payments) payments,(SELECT count(*) FROM public.tnp_manual_payment_events) events")).rows[0];

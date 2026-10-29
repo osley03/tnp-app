@@ -2,7 +2,6 @@ import { useState } from "react";
 import { externalTour } from "@/lib/external-tours";
 import { tourIdFromUrl, tourLink } from "@/lib/tour-links";
 import { PropertyPhoto } from "./PropertyPhoto";
-import { TourDashboardLink } from "./TourDashboardLink";
 export function PropertyTourLink({
   value,
   imageUrl,
@@ -29,7 +28,6 @@ export function PropertyTourLink({
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-bold">360° property tour</h2>
-        <TourDashboardLink />
       </div>
       <div
         className={

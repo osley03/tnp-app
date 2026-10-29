@@ -24,3 +24,5 @@ test("selected property cannot display a different listing photo", () => {
   assert.equal(propertyForTour([a], "one", "b"), null);
   assert.equal(propertyForTour([a, b], "different", "b"), null);
 });
+
+test("stored relative TNP tour links retain their actual listing photo",()=>{assert.equal(propertyForTour([{...a,tour_url:"/tours/one"}],"one")?.image_url,a.image_url);assert.equal(propertyForTour([{...a,tour_url:"/tours/different"}],"one"),null);});

@@ -1,6 +1,7 @@
-import {PropertyTourLink} from '@/modules/virtual-tours/components/PropertyTourLink';
-import { applicationStatus } from '@/lib/application-status';
-import { validateProperty } from '@/lib/property-validation';
+import { PropertyImage } from "@/components/properties/PropertyImage";
+import { PropertyTourLink } from "@/modules/virtual-tours/components/PropertyTourLink";
+import { applicationStatus } from "@/lib/application-status";
+import { validateProperty } from "@/lib/property-validation";
 import {
   PropertyFormModal,
   EMPTY_FORM,
@@ -57,9 +58,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 const db: typeof supabase = supabase;
 
-export const Route = createFileRoute("/_authenticated/app/landlord/properties")({
-  component: LandlordProperties,
-});
+export const Route = createFileRoute("/_authenticated/app/landlord/properties")(
+  {
+    component: LandlordProperties,
+  },
+);
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
@@ -226,21 +229,35 @@ function date(value: string | null | undefined) {
 function titleCase(value: string | null | undefined) {
   if (!value) return "Unknown";
 
-  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function statusClasses(status: string | null | undefined) {
   const value = String(status ?? "").toLowerCase();
 
-  if (["active", "approved", "verified", "released", "completed"].includes(value)) {
+  if (
+    ["active", "approved", "verified", "released", "completed"].includes(value)
+  ) {
     return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
 
-  if (["pending", "requested", "under_review", "held", "awaiting_response"].includes(value)) {
+  if (
+    [
+      "pending",
+      "requested",
+      "under_review",
+      "held",
+      "awaiting_response",
+    ].includes(value)
+  ) {
     return "border-amber-200 bg-amber-50 text-amber-700";
   }
 
-  if (["disputed", "failed", "critical", "flagged", "rejected"].includes(value)) {
+  if (
+    ["disputed", "failed", "critical", "flagged", "rejected"].includes(value)
+  ) {
     return "border-red-200 bg-red-50 text-red-700";
   }
 
@@ -248,7 +265,9 @@ function statusClasses(status: string | null | undefined) {
 }
 
 function isRentListing(listingType: string | null | undefined) {
-  return ["For Rent", "For Lease", "For Rent or Sale"].includes(String(listingType ?? ""));
+  return ["For Rent", "For Lease", "For Rent or Sale"].includes(
+    String(listingType ?? ""),
+  );
 }
 
 function isSaleListing(listingType: string | null | undefined) {
@@ -270,7 +289,9 @@ function displayPrice(property: Property) {
     return money(property.rent_usd);
   }
 
-  return property.price_usd ? money(property.price_usd) : money(property.rent_usd);
+  return property.price_usd
+    ? money(property.price_usd)
+    : money(property.rent_usd);
 }
 
 function priceLabel(property: Property) {
@@ -317,7 +338,9 @@ function LandlordProperties() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [listingFilter, setListingFilter] = useState("all");
 
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null,
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -428,7 +451,9 @@ function LandlordProperties() {
         profiles = (data ?? []) as Profile[];
       }
 
-      const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
+      const profileMap = new Map(
+        profiles.map((profile) => [profile.id, profile]),
+      );
 
       requests.forEach((request) => {
         request.tenant = profileMap.get(request.tenant_id) ?? null;
@@ -508,11 +533,13 @@ function LandlordProperties() {
 
       const matchesCategory =
         categoryFilter === "all" ||
-        String(property.property_category ?? "").toLowerCase() === categoryFilter.toLowerCase();
+        String(property.property_category ?? "").toLowerCase() ===
+          categoryFilter.toLowerCase();
 
       const matchesListing =
         listingFilter === "all" ||
-        String(property.listing_type ?? "").toLowerCase() === listingFilter.toLowerCase();
+        String(property.listing_type ?? "").toLowerCase() ===
+          listingFilter.toLowerCase();
 
       return (
         matchesSearch &&
@@ -522,7 +549,14 @@ function LandlordProperties() {
         matchesListing
       );
     });
-  }, [properties, search, availabilityFilter, verificationFilter, categoryFilter, listingFilter]);
+  }, [
+    properties,
+    search,
+    availabilityFilter,
+    verificationFilter,
+    categoryFilter,
+    listingFilter,
+  ]);
 
   /* ---------------------------------------------------------------------- */
   /* Statistics                                                              */
@@ -531,29 +565,43 @@ function LandlordProperties() {
   const stats = useMemo(() => {
     const total = properties.length;
 
-    const available = properties.filter((property) => property.available).length;
+    const available = properties.filter(
+      (property) => property.available,
+    ).length;
 
-    const occupied = properties.filter((property) => !property.available).length;
+    const occupied = properties.filter(
+      (property) => !property.available,
+    ).length;
 
     const verified = properties.filter((property) => property.verified).length;
 
     const flagged = properties.filter(
-      (property) => Array.isArray(property.fraud_flags) && property.fraud_flags.length > 0,
+      (property) =>
+        Array.isArray(property.fraud_flags) && property.fraud_flags.length > 0,
     ).length;
 
     const incomplete = properties.filter((property) => {
       const missingImage = !property.image_url;
 
-      const missingDescription = !property.description || property.description.trim().length < 20;
+      const missingDescription =
+        !property.description || property.description.trim().length < 20;
 
-      const missingAmenities = !property.amenities || property.amenities.length === 0;
+      const missingAmenities =
+        !property.amenities || property.amenities.length === 0;
 
       const missingLocation = !property.city || !property.suburb;
 
-      return missingImage || missingDescription || missingAmenities || missingLocation;
+      return (
+        missingImage ||
+        missingDescription ||
+        missingAmenities ||
+        missingLocation
+      );
     }).length;
 
-    const rentalProperties = properties.filter((property) => isRentListing(property.listing_type));
+    const rentalProperties = properties.filter((property) =>
+      isRentListing(property.listing_type),
+    );
 
     const monthlyPotential = rentalProperties.reduce(
       (sum, property) => sum + Number(property.rent_usd ?? 0),
@@ -561,9 +609,13 @@ function LandlordProperties() {
     );
 
     const averageRent =
-      rentalProperties.length > 0 ? monthlyPotential / rentalProperties.length : 0;
+      rentalProperties.length > 0
+        ? monthlyPotential / rentalProperties.length
+        : 0;
 
-    const saleListings = properties.filter((property) => isSaleListing(property.listing_type));
+    const saleListings = properties.filter((property) =>
+      isSaleListing(property.listing_type),
+    );
 
     const saleValue = saleListings.reduce(
       (sum, property) => sum + Number(property.price_usd ?? 0),
@@ -582,7 +634,9 @@ function LandlordProperties() {
       (property) => property.property_category === "Agricultural",
     ).length;
 
-    const land = properties.filter((property) => property.property_category === "Land").length;
+    const land = properties.filter(
+      (property) => property.property_category === "Land",
+    ).length;
 
     return {
       total,
@@ -607,18 +661,20 @@ function LandlordProperties() {
   );
 
   const pendingRequests =
-    selectedBundle?.requests.filter((request) =>
-      applicationStatus(request.status) === "Pending review",
+    selectedBundle?.requests.filter(
+      (request) => applicationStatus(request.status) === "Pending review",
     ) ?? [];
 
   const heldPayments =
-    selectedBundle?.payments.filter((payment) =>
-      String(payment.status).toLowerCase() === "held",
+    selectedBundle?.payments.filter(
+      (payment) => String(payment.status).toLowerCase() === "held",
     ) ?? [];
 
   const reviewAverage = selectedBundle?.reviews.length
-    ? selectedBundle.reviews.reduce((sum, review) => sum + Number(review.rating ?? 0), 0) /
-      selectedBundle.reviews.length
+    ? selectedBundle.reviews.reduce(
+        (sum, review) => sum + Number(review.rating ?? 0),
+        0,
+      ) / selectedBundle.reviews.length
     : 0;
 
   /* ---------------------------------------------------------------------- */
@@ -696,8 +752,11 @@ function LandlordProperties() {
     event.preventDefault();
 
     if (!user?.id) return;
-    const validation=validateProperty(form);
-    if(validation){setErrorMessage(validation);return;}
+    const validation = validateProperty(form);
+    if (validation) {
+      setErrorMessage(validation);
+      return;
+    }
 
     if (!form.title.trim()) {
       setErrorMessage("Property title is required.");
@@ -729,7 +788,9 @@ function LandlordProperties() {
       form.listing_type === "For Lease" ||
       form.listing_type === "For Rent or Sale";
 
-    const needsSale = form.listing_type === "For Sale" || form.listing_type === "For Rent or Sale";
+    const needsSale =
+      form.listing_type === "For Sale" ||
+      form.listing_type === "For Rent or Sale";
 
     if (needsRent && (!form.rent_usd || Number(form.rent_usd) < 0)) {
       setErrorMessage("Enter a valid monthly rent for this listing.");
@@ -742,9 +803,14 @@ function LandlordProperties() {
     }
 
     if (form.tour_url.trim()) {
-      const tourId = tourIdFromUrl(form.tour_url.trim(), window.location.origin);
+      const tourId = tourIdFromUrl(
+        form.tour_url.trim(),
+        window.location.origin,
+      );
       if (!tourId) {
-        setErrorMessage("Paste a TNP tour URL created in the 360° Tour Manager.");
+        setErrorMessage(
+          "Paste a TNP tour URL created in the 360° Tour Manager.",
+        );
         return;
       }
       const result = await supabase
@@ -755,7 +821,9 @@ function LandlordProperties() {
         .eq("is_published", true)
         .maybeSingle();
       if (result.error || !result.data) {
-        setErrorMessage("Choose one of your published tours. The tour could not be verified.");
+        setErrorMessage(
+          "Choose one of your published tours. The tour could not be verified.",
+        );
         return;
       }
     }
@@ -824,7 +892,9 @@ function LandlordProperties() {
           .from("properties")
           .update(payload as never)
           .eq("id", editingProperty.id)
-          .eq("owner_id", user.id).select("id").single();
+          .eq("owner_id", user.id)
+          .select("id")
+          .single();
 
         if (error) throw error;
       } else {
@@ -846,7 +916,9 @@ function LandlordProperties() {
       setForm(EMPTY_FORM);
     } catch (error: unknown) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Unable to save the property. Please try again.",
+        error instanceof Error
+          ? error.message
+          : "Unable to save the property. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -866,7 +938,9 @@ function LandlordProperties() {
           available: !property.available,
         })
         .eq("id", property.id)
-        .eq("owner_id", user.id).select("id").single();
+        .eq("owner_id", user.id)
+        .select("id")
+        .single();
 
       if (error) throw error;
 
@@ -882,7 +956,9 @@ function LandlordProperties() {
       }
     } catch (error: unknown) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Unable to update property availability.",
+        error instanceof Error
+          ? error.message
+          : "Unable to update property availability.",
       );
     } finally {
       setActionId(null);
@@ -892,7 +968,9 @@ function LandlordProperties() {
   async function removeProperty(property: Property) {
     if (!user?.id) return;
 
-    const confirmed = window.confirm(`Delete "${property.title}"? This action cannot be undone.`);
+    const confirmed = window.confirm(
+      `Delete "${property.title}"? This action cannot be undone.`,
+    );
 
     if (!confirmed) return;
 
@@ -904,7 +982,9 @@ function LandlordProperties() {
         .from("properties")
         .delete()
         .eq("id", property.id)
-        .eq("owner_id", user.id).select("id").single();
+        .eq("owner_id", user.id)
+        .select("id")
+        .single();
 
       if (error) throw error;
 
@@ -947,7 +1027,9 @@ function LandlordProperties() {
         <div className="max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">
           <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-red-500" />
 
-          <h2 className="text-lg font-bold text-slate-900">Unable to load properties</h2>
+          <h2 className="text-lg font-bold text-slate-900">
+            Unable to load properties
+          </h2>
 
           <p className="mt-2 text-sm text-slate-500">
             {currentUserQuery.error?.message ||
@@ -1020,22 +1102,31 @@ function LandlordProperties() {
               </h2>
 
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-                Manage residential, commercial, agricultural and land listings while monitoring
-                occupancy, verification, tenant activity and listing integrity.
+                Manage residential, commercial, agricultural and land listings
+                while monitoring occupancy, verification, tenant activity and
+                listing integrity.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-medium text-slate-300">Monthly rental potential</p>
+                <p className="text-xs font-medium text-slate-300">
+                  Monthly rental potential
+                </p>
 
-                <p className="mt-1 text-2xl font-bold">{money(stats.monthlyPotential)}</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {money(stats.monthlyPotential)}
+                </p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <p className="text-xs font-medium text-slate-300">Sale portfolio</p>
+                <p className="text-xs font-medium text-slate-300">
+                  Sale portfolio
+                </p>
 
-                <p className="mt-1 text-2xl font-bold">{money(stats.saleValue)}</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {money(stats.saleValue)}
+                </p>
               </div>
             </div>
           </div>
@@ -1043,7 +1134,12 @@ function LandlordProperties() {
 
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <StatCard label="Total" value={stats.total} icon={Building2} detail="Portfolio size" />
+          <StatCard
+            label="Total"
+            value={stats.total}
+            icon={Building2}
+            detail="Portfolio size"
+          />
 
           <StatCard
             label="Available"
@@ -1052,7 +1148,12 @@ function LandlordProperties() {
             detail="Currently listed"
           />
 
-          <StatCard label="Occupied" value={stats.occupied} icon={Users} detail="Not available" />
+          <StatCard
+            label="Occupied"
+            value={stats.occupied}
+            icon={Users}
+            detail="Not available"
+          />
 
           <StatCard
             label="Verified"
@@ -1175,10 +1276,13 @@ function LandlordProperties() {
         <section>
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Your Portfolio</h2>
+              <h2 className="text-xl font-bold text-slate-900">
+                Your Portfolio
+              </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                {filteredProperties.length} of {properties.length} properties displayed
+                {filteredProperties.length} of {properties.length} properties
+                displayed
               </p>
             </div>
 
@@ -1208,7 +1312,9 @@ function LandlordProperties() {
               <Building2 className="mx-auto h-10 w-10 text-slate-300" />
 
               <h3 className="mt-4 font-bold text-slate-900">
-                {properties.length === 0 ? "No properties yet" : "No properties match your filters"}
+                {properties.length === 0
+                  ? "No properties yet"
+                  : "No properties match your filters"}
               </h3>
 
               <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
@@ -1232,7 +1338,8 @@ function LandlordProperties() {
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredProperties.map((property) => {
                 const flagged =
-                  Array.isArray(property.fraud_flags) && property.fraud_flags.length > 0;
+                  Array.isArray(property.fraud_flags) &&
+                  property.fraud_flags.length > 0;
 
                 const incomplete =
                   !property.image_url ||
@@ -1418,7 +1525,9 @@ function HealthCard({
       <div className="flex items-center justify-between">
         <div
           className={`rounded-xl p-2.5 ${
-            danger ? "bg-red-100 text-red-600" : "bg-emerald-50 text-emerald-600"
+            danger
+              ? "bg-red-100 text-red-600"
+              : "bg-emerald-50 text-emerald-600"
           }`}
         >
           <Icon className="h-5 w-5" />
@@ -1460,23 +1569,17 @@ function PropertyCard({
   const CategoryIcon = categoryIcon(property.property_category);
 
   const landOrCommercial =
-    property.property_category === "Land" || property.property_category === "Agricultural";
+    property.property_category === "Land" ||
+    property.property_category === "Agricultural";
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="relative h-52 overflow-hidden bg-slate-100">
-        {property.image_url ? (
-          <img
-            src={property.image_url}
-            alt={property.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center text-slate-400">
-            <ImageIcon className="h-10 w-10" />
-            <span className="mt-2 text-xs font-medium">No property image</span>
-          </div>
-        )}
+        <PropertyImage
+          imageUrl={property.image_url}
+          title={property.title}
+          className="h-full w-full"
+        />
 
         <div className="absolute left-4 top-4 flex flex-wrap gap-2">
           <span
@@ -1528,7 +1631,9 @@ function PropertyCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-lg font-bold text-slate-900">{property.title}</h3>
+            <h3 className="truncate text-lg font-bold text-slate-900">
+              {property.title}
+            </h3>
 
             <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -1541,7 +1646,9 @@ function PropertyCard({
           </div>
 
           <div className="text-right">
-            <p className="text-lg font-bold text-slate-900">{displayPrice(property)}</p>
+            <p className="text-lg font-bold text-slate-900">
+              {displayPrice(property)}
+            </p>
 
             <p className="text-[11px] text-slate-400">{priceLabel(property)}</p>
           </div>
@@ -1552,35 +1659,68 @@ function PropertyCard({
             <>
               <InfoMini
                 icon={Ruler}
-                value={property.size ? `${property.size} ${property.size_unit ?? ""}` : "—"}
+                value={
+                  property.size
+                    ? `${property.size} ${property.size_unit ?? ""}`
+                    : "—"
+                }
                 label="Size"
               />
 
-              <InfoMini icon={Building2} value={String(property.rooms ?? "—")} label="Rooms" />
+              <InfoMini
+                icon={Building2}
+                value={String(property.rooms ?? "—")}
+                label="Rooms"
+              />
 
-              <InfoMini icon={Tag} value={titleCase(property.property_type)} label="Type" />
+              <InfoMini
+                icon={Tag}
+                value={titleCase(property.property_type)}
+                label="Type"
+              />
             </>
           ) : (
             <>
-              <InfoMini icon={BedDouble} value={String(property.beds ?? 0)} label="Beds" />
+              <InfoMini
+                icon={BedDouble}
+                value={String(property.beds ?? 0)}
+                label="Beds"
+              />
 
-              <InfoMini icon={Bath} value={String(property.baths ?? 0)} label="Baths" />
+              <InfoMini
+                icon={Bath}
+                value={String(property.baths ?? 0)}
+                label="Baths"
+              />
 
-              <InfoMini icon={Building2} value={titleCase(property.property_type)} label="Type" />
+              <InfoMini
+                icon={Building2}
+                value={titleCase(property.property_type)}
+                label="Type"
+              />
             </>
           )}
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {property.size && (
-            <SmallTag icon={Ruler} text={`${property.size} ${property.size_unit ?? "m²"}`} />
+            <SmallTag
+              icon={Ruler}
+              text={`${property.size} ${property.size_unit ?? "m²"}`}
+            />
           )}
 
-          {property.water_available && <SmallTag icon={Droplets} text="Water" />}
+          {property.water_available && (
+            <SmallTag icon={Droplets} text="Water" />
+          )}
 
-          {property.electricity_available && <SmallTag icon={Zap} text="Electricity" />}
+          {property.electricity_available && (
+            <SmallTag icon={Zap} text="Electricity" />
+          )}
 
-          {property.road_access && <SmallTag icon={RoadIcon} text="Road access" />}
+          {property.road_access && (
+            <SmallTag icon={RoadIcon} text="Road access" />
+          )}
         </div>
 
         <div className="mt-4 flex gap-2">
@@ -1637,7 +1777,13 @@ function PropertyCard({
 /* Small UI Components                                                        */
 /* -------------------------------------------------------------------------- */
 
-function SmallTag({ icon: Icon, text }: { icon: React.ElementType; text: string }) {
+function SmallTag({
+  icon: Icon,
+  text,
+}: {
+  icon: React.ElementType;
+  text: string;
+}) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
       <Icon className="h-3 w-3" />
@@ -1704,7 +1850,8 @@ function PropertyDetailDrawer({
   const flags = property.fraud_flags ?? [];
 
   const landRelated =
-    property.property_category === "Land" || property.property_category === "Agricultural";
+    property.property_category === "Land" ||
+    property.property_category === "Agricultural";
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/40 backdrop-blur-sm">
@@ -1732,7 +1879,9 @@ function PropertyDetailDrawer({
                   Property Inspection
                 </p>
 
-                <h2 className="text-lg font-bold text-slate-900">{property.title}</h2>
+                <h2 className="text-lg font-bold text-slate-900">
+                  {property.title}
+                </h2>
               </div>
             </div>
 
@@ -1749,22 +1898,18 @@ function PropertyDetailDrawer({
         <div className="flex-1 overflow-y-auto">
           {/* Hero */}
           <div className="relative h-60 bg-slate-100">
-            {property.image_url ? (
-              <img
-                src={property.image_url}
-                alt={property.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-400">
-                <ImageIcon className="h-12 w-12" />
-              </div>
-            )}
+            <PropertyImage
+              imageUrl={property.image_url}
+              title={property.title}
+              className="h-full w-full"
+            />
 
             <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
               <span
                 className={`rounded-full px-3 py-1.5 text-xs font-bold shadow ${
-                  property.available ? "bg-emerald-500 text-white" : "bg-slate-800 text-white"
+                  property.available
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-800 text-white"
                 }`}
               >
                 {property.available ? "Available" : "Occupied"}
@@ -1776,7 +1921,9 @@ function PropertyDetailDrawer({
 
               <span
                 className={`rounded-full px-3 py-1.5 text-xs font-bold shadow ${
-                  property.verified ? "bg-blue-600 text-white" : "bg-amber-500 text-white"
+                  property.verified
+                    ? "bg-blue-600 text-white"
+                    : "bg-amber-500 text-white"
                 }`}
               >
                 {property.verified ? "Verified Listing" : "Unverified Listing"}
@@ -1785,7 +1932,14 @@ function PropertyDetailDrawer({
           </div>
 
           <div className="space-y-6 p-6">
-            {property.tour_url&&<PropertyTourLink value={property.tour_url} imageUrl={property.image_url} propertyTitle={property.title} propertyId={property.id}/>}
+            {property.tour_url && (
+              <PropertyTourLink
+                value={property.tour_url}
+                imageUrl={property.image_url}
+                propertyTitle={property.title}
+                propertyId={property.id}
+              />
+            )}
             {/* Overview */}
             <section>
               <div className="flex items-start justify-between gap-4">
@@ -1800,20 +1954,27 @@ function PropertyDetailDrawer({
                     </span>
                   </div>
 
-                  <h3 className="mt-3 text-xl font-bold text-slate-900">{property.title}</h3>
+                  <h3 className="mt-3 text-xl font-bold text-slate-900">
+                    {property.title}
+                  </h3>
 
                   <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
                     <MapPin className="h-4 w-4" />
 
-                    {[property.suburb, property.city].filter(Boolean).join(", ") ||
-                      "Location not provided"}
+                    {[property.suburb, property.city]
+                      .filter(Boolean)
+                      .join(", ") || "Location not provided"}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-slate-900">{displayPrice(property)}</p>
+                  <p className="text-2xl font-bold text-slate-900">
+                    {displayPrice(property)}
+                  </p>
 
-                  <p className="text-xs text-slate-400">{priceLabel(property)}</p>
+                  <p className="text-xs text-slate-400">
+                    {priceLabel(property)}
+                  </p>
                 </div>
               </div>
 
@@ -1823,7 +1984,11 @@ function PropertyDetailDrawer({
                     <DetailMetric
                       icon={Ruler}
                       label="Size"
-                      value={property.size ? `${property.size} ${property.size_unit ?? "m²"}` : "—"}
+                      value={
+                        property.size
+                          ? `${property.size} ${property.size_unit ?? "m²"}`
+                          : "—"
+                      }
                     />
 
                     <DetailMetric
@@ -1838,7 +2003,11 @@ function PropertyDetailDrawer({
                       value={property.title_status || "Not provided"}
                     />
 
-                    <DetailMetric icon={Wallet} label="Price" value={displayPrice(property)} />
+                    <DetailMetric
+                      icon={Wallet}
+                      label="Price"
+                      value={displayPrice(property)}
+                    />
                   </>
                 ) : (
                   <>
@@ -1872,14 +2041,26 @@ function PropertyDetailDrawer({
 
             {/* Property specifications */}
             <section className="rounded-2xl border border-slate-200 p-5">
-              <SectionHeading icon={Building2} title="Property Specifications" />
+              <SectionHeading
+                icon={Building2}
+                title="Property Specifications"
+              />
 
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <InfoBox label="Category" value={property.property_category || "—"} />
+                <InfoBox
+                  label="Category"
+                  value={property.property_category || "—"}
+                />
 
-                <InfoBox label="Property type" value={property.property_type || "—"} />
+                <InfoBox
+                  label="Property type"
+                  value={property.property_type || "—"}
+                />
 
-                <InfoBox label="Listing purpose" value={property.listing_type || "—"} />
+                <InfoBox
+                  label="Listing purpose"
+                  value={property.listing_type || "—"}
+                />
 
                 <InfoBox
                   label="Size"
@@ -1892,11 +2073,20 @@ function PropertyDetailDrawer({
 
                 <InfoBox label="Rooms" value={String(property.rooms ?? "—")} />
 
-                <InfoBox label="Bedrooms" value={String(property.beds ?? "—")} />
+                <InfoBox
+                  label="Bedrooms"
+                  value={String(property.beds ?? "—")}
+                />
 
-                <InfoBox label="Bathrooms" value={String(property.baths ?? "—")} />
+                <InfoBox
+                  label="Bathrooms"
+                  value={String(property.baths ?? "—")}
+                />
 
-                <InfoBox label="Zoning" value={property.zoning || "Not provided"} />
+                <InfoBox
+                  label="Zoning"
+                  value={property.zoning || "Not provided"}
+                />
               </div>
             </section>
 
@@ -1936,7 +2126,10 @@ function PropertyDetailDrawer({
 
                 {property.title_status && (
                   <div className="mt-3">
-                    <InfoBox label="Title status" value={property.title_status} />
+                    <InfoBox
+                      label="Title status"
+                      value={property.title_status}
+                    />
                   </div>
                 )}
               </section>
@@ -1985,7 +2178,8 @@ function PropertyDetailDrawer({
               <SectionHeading icon={FileText} title="Property Information" />
 
               <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">
-                {property.description || "No property description has been added."}
+                {property.description ||
+                  "No property description has been added."}
               </p>
 
               <div className="mt-5">
@@ -2005,7 +2199,9 @@ function PropertyDetailDrawer({
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-2 text-sm text-amber-600">No amenities have been provided.</p>
+                  <p className="mt-2 text-sm text-amber-600">
+                    No amenities have been provided.
+                  </p>
                 )}
               </div>
             </section>
@@ -2041,7 +2237,8 @@ function PropertyDetailDrawer({
                       </p>
 
                       <p className="text-xs text-slate-500">
-                        Trust score: {activeLease.tenant?.trust_score ?? "Not available"}
+                        Trust score:{" "}
+                        {activeLease.tenant?.trust_score ?? "Not available"}
                       </p>
                     </div>
                   </div>
@@ -2049,9 +2246,15 @@ function PropertyDetailDrawer({
                   <div className="grid grid-cols-2 gap-3">
                     <InfoBox label="Rent" value={money(activeLease.rent_usd)} />
 
-                    <InfoBox label="Deposit" value={money(activeLease.deposit_usd)} />
+                    <InfoBox
+                      label="Deposit"
+                      value={money(activeLease.deposit_usd)}
+                    />
 
-                    <InfoBox label="Start" value={date(activeLease.start_date)} />
+                    <InfoBox
+                      label="Start"
+                      value={date(activeLease.start_date)}
+                    />
 
                     <InfoBox label="End" value={date(activeLease.end_date)} />
                   </div>
@@ -2105,7 +2308,9 @@ function PropertyDetailDrawer({
                       </div>
 
                       {request.message && (
-                        <p className="mt-3 text-xs leading-5 text-slate-500">{request.message}</p>
+                        <p className="mt-3 text-xs leading-5 text-slate-500">
+                          {request.message}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -2158,7 +2363,9 @@ function PropertyDetailDrawer({
                       </div>
 
                       <div className="text-right">
-                        <p className="font-bold text-slate-900">{money(payment.amount_usd)}</p>
+                        <p className="font-bold text-slate-900">
+                          {money(payment.amount_usd)}
+                        </p>
 
                         <span
                           className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusClasses(
@@ -2212,7 +2419,9 @@ function PropertyDetailDrawer({
                         <div className="flex items-center gap-1 text-amber-500">
                           <Star className="h-3.5 w-3.5 fill-current" />
 
-                          <span className="text-xs font-bold">{review.rating ?? "—"}</span>
+                          <span className="text-xs font-bold">
+                            {review.rating ?? "—"}
+                          </span>
                         </div>
                       </div>
 
@@ -2224,7 +2433,9 @@ function PropertyDetailDrawer({
                         <span>{date(review.created_at)}</span>
 
                         <span>
-                          {review.lease_confirmed ? "Lease confirmed" : "Lease not confirmed"}
+                          {review.lease_confirmed
+                            ? "Lease confirmed"
+                            : "Lease not confirmed"}
                         </span>
                       </div>
                     </div>
@@ -2238,7 +2449,9 @@ function PropertyDetailDrawer({
             {/* Integrity */}
             <section
               className={`rounded-2xl border p-5 ${
-                flags.length ? "border-red-200 bg-red-50/50" : "border-emerald-200 bg-emerald-50/50"
+                flags.length
+                  ? "border-red-200 bg-red-50/50"
+                  : "border-emerald-200 bg-emerald-50/50"
               }`}
             >
               <SectionHeading
@@ -2247,7 +2460,9 @@ function PropertyDetailDrawer({
                 badge={
                   <span
                     className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                      flags.length ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
+                      flags.length
+                        ? "bg-red-100 text-red-700"
+                        : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
                     {flags.length
@@ -2267,7 +2482,9 @@ function PropertyDetailDrawer({
                       <Flag className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
 
                       <div>
-                        <p className="text-sm font-semibold text-red-800">Integrity flag</p>
+                        <p className="text-sm font-semibold text-red-800">
+                          Integrity flag
+                        </p>
 
                         <p className="mt-1 text-xs text-red-700">{flag}</p>
                       </div>
@@ -2278,18 +2495,24 @@ function PropertyDetailDrawer({
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
 
                     <div>
-                      <p className="text-sm font-bold text-emerald-800">No active fraud flags</p>
+                      <p className="text-sm font-bold text-emerald-800">
+                        No active fraud flags
+                      </p>
 
                       <p className="mt-1 text-xs leading-5 text-slate-500">
-                        No fraud flags are currently stored against this listing.
+                        No fraud flags are currently stored against this
+                        listing.
                       </p>
                     </div>
                   </div>
                 )}
 
-                {!property.image_url && <WarningRow text="Property image is missing." />}
+                {!property.image_url && (
+                  <WarningRow text="Property image is missing." />
+                )}
 
-                {!property.description || property.description.trim().length < 20 ? (
+                {!property.description ||
+                property.description.trim().length < 20 ? (
                   <WarningRow text="Property description is missing or too short." />
                 ) : null}
 
@@ -2301,7 +2524,9 @@ function PropertyDetailDrawer({
                   <WarningRow text="This listing has not been marked as verified." />
                 )}
 
-                {!property.size && <WarningRow text="Property size has not been provided." />}
+                {!property.size && (
+                  <WarningRow text="Property size has not been provided." />
+                )}
 
                 {landRelated && !property.title_status && (
                   <WarningRow text="Land/title status has not been provided." />
@@ -2312,7 +2537,10 @@ function PropertyDetailDrawer({
             {/* Metadata */}
             <section className="rounded-2xl bg-slate-50 p-5">
               <div className="grid gap-4 sm:grid-cols-2">
-                <InfoBox label="Listing created" value={date(property.created_at)} />
+                <InfoBox
+                  label="Listing created"
+                  value={date(property.created_at)}
+                />
 
                 <InfoBox label="Property ID" value={property.id} />
               </div>
@@ -2347,7 +2575,9 @@ function DetailMetric({
 
       <p className="mt-2 text-xs text-slate-400">{label}</p>
 
-      <p className="mt-0.5 truncate text-sm font-bold text-slate-800">{value}</p>
+      <p className="mt-0.5 truncate text-sm font-bold text-slate-800">
+        {value}
+      </p>
     </div>
   );
 }
@@ -2364,16 +2594,22 @@ function UtilityBox({
   return (
     <div
       className={`rounded-xl border p-4 ${
-        enabled ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50"
+        enabled
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-slate-200 bg-slate-50"
       }`}
     >
       <div className="flex items-center gap-2">
-        <Icon className={`h-4 w-4 ${enabled ? "text-emerald-600" : "text-slate-400"}`} />
+        <Icon
+          className={`h-4 w-4 ${enabled ? "text-emerald-600" : "text-slate-400"}`}
+        />
 
         <span className="text-sm font-bold text-slate-800">{label}</span>
       </div>
 
-      <p className={`mt-1 text-xs ${enabled ? "text-emerald-700" : "text-slate-500"}`}>
+      <p
+        className={`mt-1 text-xs ${enabled ? "text-emerald-700" : "text-slate-500"}`}
+      >
         {enabled ? "Available" : "Not confirmed"}
       </p>
     </div>
@@ -2383,7 +2619,9 @@ function UtilityBox({
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
 
       <p className="mt-1 truncate text-sm font-bold text-slate-800">{value}</p>
     </div>
@@ -2416,7 +2654,9 @@ function SectionHeading({
 
 function EmptySection({ text }: { text: string }) {
   return (
-    <div className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">{text}</div>
+    <div className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">
+      {text}
+    </div>
   );
 }
 
