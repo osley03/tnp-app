@@ -138,8 +138,11 @@ export function AuthPage({
           const verified = await supabase.auth.verifyOtp({ token_hash: query.get("token_hash")!, type: "signup" });
           if (verified.error) throw verified.error;
         } else if (query.has("code")) {
-          const exchanged = await supabase.auth.exchangeCodeForSession(query.get("code")!);
-          if (exchanged.error) throw exchanged.error;
+          const existing = await supabase.auth.getSession();
+          if (!existing.data.session) {
+            const exchanged = await supabase.auth.exchangeCodeForSession(query.get("code")!);
+            if (exchanged.error) throw exchanged.error;
+          }
         }
         // Wait for Supabase to finish consuming the verification fragment.
         const { data, error } = await supabase.auth.getSession();
