@@ -117,13 +117,15 @@ export function AuthPage({
 
   useEffect(() => {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
-    if (fragment.has("error")) {
+    const query = new URLSearchParams(window.location.search);
+    if (fragment.has("error") || query.has("error") || query.has("error_code")) {
+      window.history.replaceState(null, "", "/auth?mode=signup");
       setMode(adminOnly ? "signin" : "signup");
       setMsg(
         "This verification link is invalid or expired. Request a new confirmation email below.",
       );
     } else if (
-      (fragment.has("access_token") ||
+      (fragment.has("access_token") || query.has("token_hash") || query.has("code") ||
         new URLSearchParams(window.location.search).get("confirmation") === "1") &&
       !confirmationHandled.current
     ) {
@@ -131,6 +133,14 @@ export function AuthPage({
       setBusy(true);
       setMode("signin");
       void (async () => {
+        // Custom email templates may use a token hash instead of an implicit fragment.
+        if (query.has("token_hash")) {
+          const verified = await supabase.auth.verifyOtp({ token_hash: query.get("token_hash")!, type: "signup" });
+          if (verified.error) throw verified.error;
+        } else if (query.has("code")) {
+          const exchanged = await supabase.auth.exchangeCodeForSession(query.get("code")!);
+          if (exchanged.error) throw exchanged.error;
+        }
         // Wait for Supabase to finish consuming the verification fragment.
         const { data, error } = await supabase.auth.getSession();
         if (error || !data.session || !data.session.user.email_confirmed_at)
