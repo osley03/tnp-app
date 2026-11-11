@@ -1,7 +1,14 @@
 project_id = "kjtkwujuevbzcydbjscq"
 [auth]
 site_url = "https://tnp-app-alpha.vercel.app"
-additional_redirect_urls = ["http://localhost:3000/**", "https://tnp-app-alpha.vercel.app/auth/callback", "https://tnp-app-alpha.vercel.app/auth"]
+additional_redirect_urls = ["http://localhost:3000/**", "https://tnp-app-alpha.vercel.app/auth/callback", "https://tnp-app-alpha.vercel.app/auth", "https://tnp-app-alpha.vercel.app/auth?mode=signin&confirmation=1"]
+
+[auth.email.template.confirmation]
+subject = "Confirm your email - TNP"
+content_path = "./supabase/templates/confirmation.html"
+
+[functions.registration-status]
+verify_jwt = false
 
 [functions.virtual-tours]
 verify_jwt = false

@@ -1,10 +1,8 @@
-import {
-  registrationNotice,
-  TNP_EMAIL_REDIRECT,
-} from "@/lib/registration-notice";
+import { registrationNotice, TNP_EMAIL_REDIRECT } from "@/lib/registration-notice";
 import { resolveRole } from "@/lib/roles";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { roleHome, type AppRole } from "@/lib/session";
 import authBg from "@/assets/auth-bg.jpg";
@@ -14,10 +12,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (
     search: Record<string, unknown>,
   ): { mode?: "signup" | "signin" | undefined } => ({
-    mode:
-      search["mode"] === "signup" || search["mode"] === "signin"
-        ? search["mode"]
-        : undefined,
+    mode: search["mode"] === "signup" || search["mode"] === "signin" ? search["mode"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -30,8 +25,7 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "Sign up or sign in — TNP" },
       {
         property: "og:description",
-        content:
-          "Role-based access for tenants, landlords and administrators on TNP.",
+        content: "Role-based access for tenants, landlords and administrators on TNP.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -58,24 +52,21 @@ export function AuthPage({
   initialMode?: "signup" | "signin";
 }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signup" | "signin">(
-    adminOnly ? "signin" : initialMode,
-  );
+  const [mode, setMode] = useState<"signup" | "signin">(adminOnly ? "signin" : initialMode);
   const [role, setRole] = useState<AppRole>("tenant");
   const [fullName, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const confirmationHandled = useRef(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [resendBusy, setResendBusy] = useState(false);
   const [resendAfter, setResendAfter] = useState(0);
   useEffect(() => {
     if (!resendAfter) return;
-    const timer = window.setTimeout(
-      () => setResendAfter(0),
-      Math.max(0, resendAfter - Date.now()),
-    );
+    const timer = window.setTimeout(() => setResendAfter(0), Math.max(0, resendAfter - Date.now()));
     return () => window.clearTimeout(timer);
   }, [resendAfter]);
 
@@ -131,9 +122,37 @@ export function AuthPage({
       setMsg(
         "This verification link is invalid or expired. Request a new confirmation email below.",
       );
-    } else if (fragment.has("access_token")) {
+    } else if (
+      (fragment.has("access_token") ||
+        new URLSearchParams(window.location.search).get("confirmation") === "1") &&
+      !confirmationHandled.current
+    ) {
+      confirmationHandled.current = true;
       setBusy(true);
-      void go().finally(() => setBusy(false));
+      setMode("signin");
+      void (async () => {
+        // Wait for Supabase to finish consuming the verification fragment.
+        const { data, error } = await supabase.auth.getSession();
+        if (error || !data.session || !data.session.user.email_confirmed_at)
+          throw new Error(
+            "Unable to complete verification. Request a new confirmation email from Sign up.",
+          );
+        const signedOut = await supabase.auth.signOut({ scope: "local" });
+        if (signedOut.error) throw signedOut.error;
+        window.history.replaceState(null, "", "/auth?mode=signin");
+        setPassword("");
+        setConfirmPassword("");
+        setMsg(
+          "Email confirmed. Sign in with the email and password you used to create your TNP account.",
+        );
+      })()
+        .catch(() => {
+          window.history.replaceState(null, "", "/auth?mode=signin");
+          setMsg(
+            "Unable to complete verification. Try signing in, or request a new confirmation email from Sign up.",
+          );
+        })
+        .finally(() => setBusy(false));
     }
   }, [go]);
   async function resendConfirmation() {
@@ -157,9 +176,7 @@ export function AuthPage({
       );
     } catch (error) {
       setMsg(
-        error instanceof Error
-          ? error.message
-          : "Unable to request confirmation. Please retry.",
+        error instanceof Error ? error.message : "Unable to request confirmation. Please retry.",
       );
     } finally {
       setResendBusy(false);
@@ -172,6 +189,24 @@ export function AuthPage({
 
     try {
       if (!adminOnly && mode === "signup") {
+        if (password !== confirmPassword) {
+          setMsg("Passwords do not match. Enter the same password in both fields.");
+          return;
+        }
+        const availability = await supabase.functions.invoke("registration-status", {
+          body: { email: email.trim() },
+        });
+        if (availability.error || typeof availability.data?.exists !== "boolean") {
+          throw new Error(
+            "Unable to check this email right now. Please wait a moment and try again.",
+          );
+        }
+        if (availability.data.exists) {
+          setMsg(
+            "This email is already registered. Sign in to your existing account, or use Resend verification if you have not confirmed your email.",
+          );
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -188,6 +223,7 @@ export function AuthPage({
         if (error) throw error;
 
         setPassword("");
+        setConfirmPassword("");
 
         if (!data.session) {
           setMsg(registrationNotice(data));
@@ -218,8 +254,7 @@ export function AuthPage({
         setPassword("");
       }
     } catch (err) {
-      const code =
-        err && typeof err === "object" && "code" in err ? String(err.code) : "";
+      const code = err && typeof err === "object" && "code" in err ? String(err.code) : "";
       if (
         !adminOnly &&
         mode === "signup" &&
@@ -229,11 +264,8 @@ export function AuthPage({
         setPassword("");
         setMsg(registrationNotice({ user: { identities: [] } }));
       } else if (code === "email_not_confirmed") {
-        setMsg(
-          "Verify your email before signing in. Open Sign up to resend verification.",
-        );
-      } else
-        setMsg(err instanceof Error ? err.message : "Something went wrong");
+        setMsg("Verify your email before signing in. Open Sign up to resend verification.");
+      } else setMsg(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
@@ -294,13 +326,13 @@ export function AuthPage({
                   setMsg(null);
                   setEmail("");
                   setPassword("");
+                  setConfirmPassword("");
                   setName("");
                   setPhone("");
                 }}
                 className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
               >
-                Already have an account?{" "}
-                <span className="text-terra">SIGN IN</span>
+                Already have an account? <span className="text-terra">SIGN IN</span>
               </button>
             ) : (
               <button
@@ -310,11 +342,11 @@ export function AuthPage({
                   setMsg(null);
                   setEmail("");
                   setPassword("");
+                  setConfirmPassword("");
                 }}
                 className="mt-5 w-full rounded-xl bg-fg/5 px-3 py-2 font-mono text-[10px] text-fg/70 ring-1 ring-fg/10 hover:text-fg"
               >
-                Don't have an account?{" "}
-                <span className="text-terra">SIGN UP</span>
+                Don't have an account? <span className="text-terra">SIGN UP</span>
               </button>
             ))}
 
@@ -340,17 +372,8 @@ export function AuthPage({
 
             {mode === "signup" && (
               <>
-                <Input
-                  value={fullName}
-                  onChange={setName}
-                  placeholder="Full name"
-                  required
-                />
-                <Input
-                  value={phone}
-                  onChange={setPhone}
-                  placeholder="Phone (+263 …)"
-                />
+                <Input value={fullName} onChange={setName} placeholder="Full name" required />
+                <Input value={phone} onChange={setPhone} placeholder="Phone (+263 …)" />
               </>
             )}
             <Input
@@ -366,18 +389,22 @@ export function AuthPage({
               value={password}
               onChange={setPassword}
               placeholder="Password"
-              autocomplete={
-                mode === "signup" ? "new-password" : "current-password"
-              }
+              autocomplete={mode === "signup" ? "new-password" : "current-password"}
               required
             />
+            {mode === "signup" && (
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder="Confirm password"
+                autocomplete="new-password"
+                required
+              />
+            )}
 
             {msg && (
-              <p
-                role="status"
-                aria-live="polite"
-                className="text-[11px] text-clay"
-              >
+              <p role="status" aria-live="polite" className="text-[11px] text-clay">
                 {msg}
               </p>
             )}
@@ -421,17 +448,11 @@ export function AuthPage({
 
         <p className="mt-5 max-w-[340px] text-center font-mono text-[9px] leading-relaxed text-fg/50">
           {adminOnly ? (
-            <Link
-              to="/auth"
-              className="underline underline-offset-4 hover:text-fg"
-            >
+            <Link to="/auth" className="underline underline-offset-4 hover:text-fg">
               Tenant or landlord? Return to account access
             </Link>
           ) : (
-            <Link
-              to="/admin-signin"
-              className="underline underline-offset-4 hover:text-fg"
-            >
+            <Link to="/admin-signin" className="underline underline-offset-4 hover:text-fg">
               Admin sign in
             </Link>
           )}
@@ -456,15 +477,33 @@ function Input({
   placeholder?: string;
   autocomplete?: string;
 }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!value) setVisible(false);
+  }, [value]);
   return (
-    <input
-      type={type}
-      value={value}
-      required={required}
-      placeholder={placeholder}
-      autoComplete={autocomplete}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-xl bg-fg/5 px-3.5 py-2.5 text-[12px] text-fg ring-1 ring-fg/10 outline-none transition-shadow placeholder:text-fg/40 focus:ring-terra/50"
-    />
+    <div className="relative">
+      <input
+        type={type === "password" && visible ? "text" : type}
+        aria-label={placeholder}
+        value={value}
+        required={required}
+        placeholder={placeholder}
+        autoComplete={autocomplete}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full rounded-xl bg-fg/5 px-3.5 py-2.5 text-[12px] text-fg ring-1 ring-fg/10 outline-none transition-shadow placeholder:text-fg/40 focus:ring-terra/50 ${type === "password" ? "pr-12" : ""}`}
+      />
+      {type === "password" && (
+        <button
+          type="button"
+          aria-label={`${visible ? "Hide" : "Show"} ${placeholder?.toLowerCase() || "password"}`}
+          aria-pressed={visible}
+          onClick={() => setVisible(!visible)}
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-fg/80 hover:text-terra focus-visible:outline-2 focus-visible:outline-terra"
+        >
+          {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+        </button>
+      )}
+    </div>
   );
 }
